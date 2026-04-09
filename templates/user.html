@@ -1,450 +1,448 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VenueFlow | Your Ticket — IPL Final 2026</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        .tab-btn.active { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); color: white; }
-        .tab-panel { display: none; }
-        .tab-panel.active { display: block; }
-        @keyframes ticket-shine {
-            0%   { transform: translateX(-100%) rotate(20deg); }
-            100% { transform: translateX(200%) rotate(20deg); }
-        }
-        .ticket-shine { animation: ticket-shine 3s infinite 2s; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VenueFlow | Your IPL Ticket</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+body { background: radial-gradient(ellipse at top left, #0d0a1f 0%, #030303 55%); }
+.orb { position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; }
+
+/* Ticket card gradient */
+.ticket-bg {
+  background: linear-gradient(135deg, #0f0a2e 0%, #1a0938 30%, #0a1f3d 60%, #07132e 100%);
+  position: relative; overflow: hidden;
+}
+.ticket-bg::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse at 70% 30%, rgba(139,92,246,0.2) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 80%, rgba(59,130,246,0.15) 0%, transparent 50%);
+}
+
+/* Holographic foil shimmer */
+@keyframes foil {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.foil-effect {
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(139,92,246,0.12) 25%, rgba(6,182,212,0.08) 50%, rgba(236,72,153,0.1) 75%, rgba(255,255,255,0.03) 100%);
+  background-size: 300% 300%;
+  animation: foil 6s ease infinite;
+}
+
+/* QR wrapper with glow */
+.qr-glow {
+  box-shadow: 0 0 0 1px rgba(139,92,246,0.3),
+              0 0 30px rgba(139,92,246,0.2),
+              0 0 60px rgba(99,102,241,0.1),
+              inset 0 0 0 4px white;
+}
+
+/* Tab styles */
+.tab-pill { transition: all .3s ease; border: 1px solid rgba(255,255,255,0.06); }
+.tab-pill.active {
+  background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(6,182,212,0.15));
+  border-color: rgba(99,102,241,0.5);
+  box-shadow: 0 0 20px rgba(99,102,241,0.2);
+  color: white;
+}
+</style>
 </head>
-<body class="bg-[#030303] text-white min-h-screen flex flex-col font-sans">
+<body class="text-white min-h-screen flex flex-col font-sans">
 
-    <!-- Alert Banner -->
-    <div id="alert-banner" class="fixed top-0 left-0 w-full z-[200] translate-y-[-100%] font-black py-4 px-6 text-center flex items-center justify-center gap-3 shadow-2xl">
-        <span class="animate-bounce" id="alert-icon">⚠️</span>
-        <span id="alert-msg" class="text-sm"></span>
-        <button onclick="gsap.to('#alert-banner',{y:'-100%',duration:0.5})" class="ml-3 text-white/60 text-xs border border-white/20 px-2 py-1 rounded">✕</button>
+<!-- Ambient orbs for color -->
+<div class="orb" style="width:450px;height:450px;top:-100px;right:-80px;background:radial-gradient(circle,rgba(139,92,246,0.12),transparent 70%)"></div>
+<div class="orb" style="width:350px;height:350px;bottom:5%;left:-60px;background:radial-gradient(circle,rgba(59,130,246,0.10),transparent 70%)"></div>
+<div class="orb" style="width:280px;height:280px;top:40%;left:40%;background:radial-gradient(circle,rgba(6,182,212,0.06),transparent 70%)"></div>
+
+<!-- Alert Banner -->
+<div id="alert-banner" class="fixed top-0 left-0 w-full z-[200] font-black py-4 px-5 text-center flex items-center justify-center gap-3 shadow-2xl" style="transform:translateY(-100%);background:linear-gradient(135deg,#7c3aed,#0ea5e9)">
+  <span class="animate-bounce" id="alert-icon">⚠️</span>
+  <span id="alert-msg" class="text-sm"></span>
+  <button onclick="gsap.to('#alert-banner',{y:'-100%',duration:.5})" class="ml-3 text-white/60 text-xs border border-white/20 px-2 py-1 rounded">✕</button>
+</div>
+
+<!-- Nav -->
+<nav class="sticky top-0 z-50 glass-strong border-b border-white/5 px-5 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 0 20px rgba(99,102,241,0.4)">
+      {{ name[:1].upper() }}
+    </div>
+    <div>
+      <p class="font-black text-sm grad-text-purple">{{ name }}</p>
+      <p class="text-[10px] font-mono text-gray-500 max-w-[180px] truncate">{{ email }}</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full border" style="color:#f59e0b;background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.25)">🏏 IPL 2026</span>
+    <a href="/logout" class="text-[10px] px-3 py-1.5 rounded-xl font-bold border transition-all" style="color:#ef4444;background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.25)">Exit</a>
+  </div>
+</nav>
+
+<!-- Tab Bar -->
+<div class="sticky z-40 glass-strong border-b border-white/5 px-4 py-2" style="top:57px">
+  <div class="flex gap-1.5 max-w-lg mx-auto">
+    <button class="tab-pill active flex-1 text-[10px] font-black uppercase tracking-wider py-2 px-1 rounded-xl text-gray-400" onclick="switchTab('ticket',this)">🎟 Ticket</button>
+    <button class="tab-pill flex-1 text-[10px] font-black uppercase tracking-wider py-2 px-1 rounded-xl text-gray-400" onclick="switchTab('gate',this)">🚦 Gate</button>
+    <button class="tab-pill flex-1 text-[10px] font-black uppercase tracking-wider py-2 px-1 rounded-xl text-gray-400" onclick="switchTab('map',this)">🗺 Nav</button>
+    <button class="tab-pill flex-1 text-[10px] font-black uppercase tracking-wider py-2 px-1 rounded-xl text-gray-400" onclick="switchTab('info',this)">📋 Info</button>
+  </div>
+</div>
+
+<div class="flex-grow relative z-10 max-w-lg mx-auto px-4 pt-4 pb-6 w-full">
+
+  <!-- ══════════ TAB: TICKET ══════════ -->
+  <div id="tab-ticket" class="tab-panel active space-y-4">
+
+    <!-- Holographic Ticket -->
+    <div class="ticket-bg rounded-3xl overflow-hidden border relative" style="opacity:0;transform:translateY(24px);border-color:rgba(139,92,246,0.3);box-shadow:0 20px 80px rgba(99,102,241,0.25)">
+      <!-- Foil overlay -->
+      <div class="absolute inset-0 foil-effect pointer-events-none z-10 mix-blend-screen"></div>
+      <!-- Holographic shimmer sweep -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none z-10">
+        <div class="absolute inset-y-0 w-16 opacity-40 ticket-shine" style="background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent)"></div>
+      </div>
+      <!-- Corner rings -->
+      <div class="absolute top-4 right-4 w-16 h-16 rounded-full border opacity-20 orbit-1" style="border-color:rgba(139,92,246,0.5)"></div>
+      <div class="absolute top-6 right-6 w-10 h-10 rounded-full border opacity-15 orbit-2" style="border-color:rgba(6,182,212,0.5)"></div>
+
+      <!-- Ticket Header -->
+      <div class="relative z-20 p-6 pb-3">
+        <div class="flex justify-between items-start mb-5">
+          <div>
+            <p class="text-[9px] uppercase font-black tracking-[0.25em] mb-1" style="color:rgba(167,139,250,0.8)">🇮🇳 Official E-Ticket</p>
+            <h1 class="text-2xl font-black text-white">IPL Final 2026</h1>
+            <p class="text-xs mt-0.5" style="color:rgba(167,139,250,0.7)">🏟 Narendra Modi Stadium, Ahmedabad</p>
+          </div>
+          <div class="rounded-xl p-2 text-center border" style="background:rgba(34,197,94,0.12);border-color:rgba(34,197,94,0.3)">
+            <div class="w-2 h-2 rounded-full mx-auto mb-1 pulse-dot" style="background:#22c55e;color:#22c55e"></div>
+            <p class="text-[9px] font-black uppercase" style="color:#22c55e">Valid</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          {% set fields = [('Attendee','{{ name }}'),('Gate','G{{ gate_id }}'),('Date','Apr 12, 2026'),('Block','G{{ gate_id }}B · Row 14')] %}
+          <div class="rounded-xl p-3 border" style="background:rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.07)">
+            <p style="color:rgba(167,139,250,0.7);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Attendee</p>
+            <p class="font-bold text-sm text-white truncate">{{ name }}</p>
+          </div>
+          <div class="rounded-xl p-3 border" style="background:rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.07)">
+            <p style="color:rgba(167,139,250,0.7);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Entry Gate</p>
+            <p class="font-black text-3xl font-mono text-white" id="gate-display">G{{ gate_id }}</p>
+          </div>
+          <div class="rounded-xl p-3 border" style="background:rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.07)">
+            <p style="color:rgba(167,139,250,0.7);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Match Date</p>
+            <p class="font-bold text-sm text-white">Apr 12, 2026</p>
+          </div>
+          <div class="rounded-xl p-3 border" style="background:rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.07)">
+            <p style="color:rgba(167,139,250,0.7);font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:4px">Seat Block</p>
+            <p class="font-bold text-sm text-white">G{{ gate_id }}B · Row 14</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tear divider -->
+      <div class="relative z-20 mx-5 my-4 flex items-center">
+        <div style="margin-left:-22px;width:18px;height:18px;border-radius:50%;background:#030303"></div>
+        <div class="flex-grow" style="border-top:2px dashed rgba(255,255,255,0.12)"></div>
+        <div style="margin-right:-22px;width:18px;height:18px;border-radius:50%;background:#030303"></div>
+      </div>
+
+      <!-- QR Code Section -->
+      <div class="relative z-20 px-6 pt-2 pb-6 flex flex-col items-center">
+        <p style="color:rgba(167,139,250,0.7);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:16px">Present at Gate Entry</p>
+        <div class="relative cursor-pointer" onclick="pulseQR()" id="qr-wrap">
+          <!-- QR glow ring -->
+          <div class="absolute -inset-2 rounded-2xl" style="background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(6,182,212,0.2));filter:blur(8px)"></div>
+          <div class="relative bg-white rounded-2xl p-4 qr-glow hover:scale-105 active:scale-95 transition-transform">
+            <canvas id="qr"></canvas>
+          </div>
+          <!-- Success flash -->
+          <div id="qr-flash" class="absolute inset-0 flex items-center justify-center rounded-2xl opacity-0" style="background:rgba(34,197,94,0.9)">
+            <span class="text-4xl font-black text-white">✓</span>
+          </div>
+        </div>
+        <p class="font-mono text-center mt-3" style="color:rgba(139,92,246,0.4);font-size:9px">{{ email }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ TAB: GATE STATUS ══════════ -->
+  <div id="tab-gate" class="tab-panel space-y-4">
+    <div class="glass rounded-2xl p-6 border border-white/5" style="box-shadow:0 0 40px rgba(6,182,212,0.06)">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <p class="text-gray-500 text-[9px] uppercase font-bold tracking-widest">Live Gate Status</p>
+          <p class="text-2xl font-black">Gate <span id="gate-name-big" class="grad-text-cyan">{{ gate_id }}</span></p>
+        </div>
+        <div id="live-badge" class="flex items-center gap-2 px-3 py-2 rounded-xl border transition-all duration-500" style="background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3)">
+          <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot" style="color:#22c55e"></span>
+          <span id="live-status" class="text-xs font-bold uppercase tracking-widest text-green-400">Open</span>
+        </div>
+      </div>
+
+      <!-- Two rings side by side -->
+      <div class="grid grid-cols-2 gap-4 mb-5">
+        <!-- Crowd ring -->
+        <div class="text-center">
+          <div class="relative w-24 h-24 mx-auto">
+            <svg class="w-24 h-24" viewBox="0 0 96 96" style="transform:rotate(-90deg)">
+              <circle cx="48" cy="48" r="38" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="9"/>
+              <circle id="crowd-ring" cx="48" cy="48" r="38" fill="none" stroke="#3b82f6" stroke-width="9"
+                      stroke-dasharray="238.76" stroke-dashoffset="238.76" stroke-linecap="round" class="transition-all duration-1000"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="gate-crowd-pct" class="text-lg font-black font-mono grad-text-blue">0%</span>
+            </div>
+          </div>
+          <p class="text-[9px] text-gray-600 font-bold uppercase mt-2">Crowd Fill</p>
+        </div>
+        <!-- Wait ring -->
+        <div class="text-center">
+          <div class="relative w-24 h-24 mx-auto">
+            <svg class="w-24 h-24" viewBox="0 0 96 96" style="transform:rotate(-90deg)">
+              <circle cx="48" cy="48" r="38" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="9"/>
+              <circle id="wait-ring" cx="48" cy="48" r="38" fill="none" stroke="#22c55e" stroke-width="9"
+                      stroke-dasharray="238.76" stroke-dashoffset="59" stroke-linecap="round" class="transition-all duration-1000"/>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="wait-time" class="text-lg font-black font-mono" style="color:#22c55e">3m</span>
+            </div>
+          </div>
+          <p class="text-[9px] text-gray-600 font-bold uppercase mt-2">Est. Wait</p>
+        </div>
+      </div>
+
+      <div class="rounded-xl p-4 border" style="background:rgba(0,0,0,0.3);border-color:rgba(255,255,255,0.05)">
+        <div class="flex justify-between text-[10px] font-mono mb-2">
+          <span class="text-gray-500">Crowd count</span>
+          <span class="font-bold text-white" id="gate-crowd">— / 200</span>
+        </div>
+        <div class="relative h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,0.04)">
+          <div id="gate-crowd-bar" class="absolute left-0 top-0 h-full w-0 rounded-full transition-all duration-1000" style="background:linear-gradient(90deg,#3b82f6,#6366f1)"></div>
+        </div>
+        <p id="gate-hint" class="text-[10px] font-mono mt-2" style="color:rgba(99,102,241,0.7)">Walk towards Gate {{ gate_id }} entrance</p>
+      </div>
     </div>
 
-    <!-- Nav -->
-    <nav class="sticky top-0 z-50 bg-black/95 backdrop-blur-2xl border-b border-white/5 px-5 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-black shadow-[0_0_15px_rgba(99,102,241,0.4)] shrink-0">{{ name[:1].upper() }}</div>
-            <div>
-                <p class="font-black text-sm leading-tight">{{ name }}</p>
-                <p class="text-gray-500 text-[10px] font-mono truncate max-w-[160px]">{{ email }}</p>
-            </div>
+    <!-- Match Info -->
+    <div class="glass rounded-2xl p-5 border border-white/5">
+      <h3 class="text-sm font-black mb-4 grad-text-gold">🏏 Match Information</h3>
+      <div class="space-y-2.5">
+        {% for row in [('Match','IPL Final 2026'),('Teams','RCB 🆚 MI'),('Toss','Apr 12 · 7:30 PM IST'),('Gates Open','4:00 PM'),('Venue','Narendra Modi Stadium, Ahmedabad')] %}
+        <div class="flex justify-between items-center py-2 border-b" style="border-color:rgba(255,255,255,0.05)">
+          <span class="text-gray-500 text-xs font-bold">{{ row[0] }}</span>
+          <span class="text-white text-xs font-bold">{{ row[1] }}</span>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[9px] font-bold uppercase px-2.5 py-1 rounded-full">🏟 IPL 2026</span>
-            <a href="/logout" class="text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-xl font-bold hover:bg-red-500/20 transition-all">Exit</a>
-        </div>
-    </nav>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 
-    <!-- Tab bar -->
-    <div class="sticky top-[57px] z-40 bg-black/90 backdrop-blur-xl border-b border-white/5 px-4 py-2">
-        <div class="flex gap-2 max-w-lg mx-auto">
-            <button class="tab-btn active flex-1 text-[10px] font-black uppercase tracking-widest py-2 px-3 rounded-xl border border-white/10 text-gray-400 transition-all" onclick="switchTab('ticket', this)">🎟 Ticket</button>
-            <button class="tab-btn flex-1 text-[10px] font-black uppercase tracking-widest py-2 px-3 rounded-xl border border-white/10 text-gray-400 transition-all" onclick="switchTab('gate', this)">🚦 Gate</button>
-            <button class="tab-btn flex-1 text-[10px] font-black uppercase tracking-widest py-2 px-3 rounded-xl border border-white/10 text-gray-400 transition-all" onclick="switchTab('map', this)">🗺 Navigate</button>
-            <button class="tab-btn flex-1 text-[10px] font-black uppercase tracking-widest py-2 px-3 rounded-xl border border-white/10 text-gray-400 transition-all" onclick="switchTab('info', this)">📋 Info</button>
+  <!-- ══════════ TAB: NAVIGATE ══════════ -->
+  <div id="tab-map" class="tab-panel space-y-4">
+    <div class="glass rounded-2xl border border-white/5 overflow-hidden">
+      <div class="p-5 pb-0 flex justify-between items-center">
+        <div>
+          <p class="text-gray-500 text-[9px] uppercase font-bold tracking-widest">AR Navigation</p>
+          <p class="text-xl font-black">To Gate <span id="nav-gate" class="grad-text-cyan">{{ gate_id }}</span></p>
         </div>
+        <div class="text-right">
+          <p class="text-[9px] text-gray-500 uppercase font-bold">ETA</p>
+          <p class="text-2xl font-black font-mono" style="color:#22c55e" id="nav-eta">4:00</p>
+        </div>
+      </div>
+
+      <!-- AR View -->
+      <div class="relative mx-4 my-4 rounded-2xl overflow-hidden scanlines" style="height:220px;background:rgba(3,5,20,0.8);border:1px solid rgba(99,102,241,0.15)">
+        <!-- Grid -->
+        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 300 220" preserveAspectRatio="none" style="opacity:0.15">
+          <defs><pattern id="gr2" width="35" height="35" patternUnits="userSpaceOnUse"><path d="M35 0L0 0 0 35" fill="none" stroke="#6366f1" stroke-width="0.5"/></pattern></defs>
+          <rect width="100%" height="100%" fill="url(#gr2)"/>
+          <line x1="150" y1="110" x2="0"   y2="220" stroke="#818cf8" stroke-width="0.6" opacity="0.6"/>
+          <line x1="150" y1="110" x2="300" y2="220" stroke="#818cf8" stroke-width="0.6" opacity="0.6"/>
+          <line x1="150" y1="110" x2="75"  y2="220" stroke="#818cf8" stroke-width="0.4" opacity="0.4"/>
+          <line x1="150" y1="110" x2="225" y2="220" stroke="#818cf8" stroke-width="0.4" opacity="0.4"/>
+        </svg>
+        <!-- AR Path -->
+        <div class="absolute inset-0 flex justify-center items-center">
+          <svg viewBox="0 0 100 190" class="overflow-visible" style="height:200px;width:110px">
+            <defs>
+              <linearGradient id="pg2" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.2"/>
+                <stop offset="50%"  stop-color="#8b5cf6"/>
+                <stop offset="100%" stop-color="#22c55e"/>
+              </linearGradient>
+              <filter id="pathGlow2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path id="ar-path" d="M 50 180 C 37 155, 63 120, 50 90 S 32 52, 50 20" fill="none" stroke="url(#pg2)" stroke-width="8" stroke-linecap="round" filter="url(#pathGlow2)"/>
+            <circle id="ar-dest" cx="50" cy="20" r="11" opacity="0" style="fill:#22c55e;filter:drop-shadow(0 0 8px #22c55e)"/>
+            <circle id="ar-ring" cx="50" cy="20" r="24" opacity="0" fill="rgba(34,197,94,0.12)"/>
+          </svg>
+        </div>
+        <!-- Chips -->
+        <div id="ar-chip" class="absolute top-3 right-3 rounded-xl px-3 py-2 border" style="background:rgba(99,102,241,0.7);backdrop-filter:blur(8px);border-color:rgba(139,92,246,0.5);opacity:0">
+          <p class="text-white text-xs font-black">↑ Straight 45m</p>
+        </div>
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+          <div class="w-3 h-3 rounded-full pulse-dot" style="background:#3b82f6;color:#3b82f6;box-shadow:0 0 10px #3b82f6"></div>
+          <span class="text-[8px] font-bold uppercase" style="color:#3b82f6">You</span>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="px-5 pb-5 space-y-2">
+        <div class="flex items-center gap-3 rounded-xl p-3 border" style="background:rgba(99,102,241,0.1);border-color:rgba(99,102,241,0.25)">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0" style="background:#6366f1">1</div>
+          <p class="text-sm font-bold text-white">Walk straight from entrance (45m)</p>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl p-3 border border-white/5" style="background:rgba(0,0,0,0.3)">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 text-gray-600 border border-gray-700">2</div>
+          <p class="text-sm font-bold text-gray-500">Turn right at security (20m)</p>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl p-3 border border-white/5" style="background:rgba(0,0,0,0.3)">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 text-gray-600 border border-gray-700">3</div>
+          <p class="text-sm font-bold text-gray-500">Present QR at Gate {{ gate_id }} staff</p>
+        </div>
+      </div>
+      <p id="status-hint" class="text-center pb-4 font-mono text-[10px]" style="color:rgba(99,102,241,0.5)">Keep straight towards Gate {{ gate_id }}</p>
+    </div>
+  </div>
+
+  <!-- ══════════ TAB: INFO ══════════ -->
+  <div id="tab-info" class="tab-panel space-y-4">
+    <div class="glass rounded-2xl p-5 border border-white/5">
+      <h3 class="text-sm font-black mb-4 grad-text-purple">🏟 Venue Guide</h3>
+      <div class="grid grid-cols-3 gap-2">
+        {% for item in [('🚻','Restrooms','L1, L2, L3'),('🍔','Food Court','G3,6,9,12'),('🅿️','Parking','Lot A, B, C'),('🏥','Medical','G1, G7'),('📶','Free WiFi','VenueFlow'),('♿','Access','G1,4,7,10')] %}
+        <div class="rounded-xl p-3 text-center border border-white/5 card-3d" style="background:rgba(0,0,0,0.4)">
+          <div class="text-2xl mb-1">{{ item[0] }}</div>
+          <p class="text-white text-[10px] font-bold">{{ item[1] }}</p>
+          <p class="text-gray-600 text-[9px] mt-0.5">{{ item[2] }}</p>
+        </div>
+        {% endfor %}
+      </div>
     </div>
 
-    <div class="flex-grow max-w-lg mx-auto px-4 pt-4 pb-6 w-full space-y-4">
-
-        <!-- ═══ TAB: TICKET ═══════════════════════════════════════════ -->
-        <div id="tab-ticket" class="tab-panel active">
-            <!-- Digital Ticket Card -->
-            <div class="ticket-card bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#4c1d95] rounded-3xl overflow-hidden shadow-[0_20px_60px_rgba(79,70,229,0.4)] border border-indigo-500/30 relative" style="opacity:0;transform:translateY(28px)">
-                <!-- Shine sweep -->
-                <div class="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div class="w-20 h-full bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 ticket-shine"></div>
-                </div>
-                <div class="absolute -top-12 -right-12 w-36 h-36 bg-blue-400/15 rounded-full blur-2xl pointer-events-none"></div>
-
-                <!-- Header -->
-                <div class="p-6 pb-2">
-                    <div class="flex justify-between items-start mb-5">
-                        <div>
-                            <p class="text-indigo-300 text-[9px] uppercase font-black tracking-[0.2em] mb-1">Official E-Ticket</p>
-                            <h1 class="text-2xl font-black text-white">IPL Final 2026</h1>
-                            <p class="text-indigo-300 text-xs mt-0.5">🏟 Narendra Modi Stadium, Ahmedabad</p>
-                        </div>
-                        <div class="bg-green-500/20 border border-green-400/40 px-3 py-2 rounded-xl text-center">
-                            <span class="w-2 h-2 rounded-full bg-green-400 pulse-dot inline-block mb-1"></span>
-                            <p class="text-green-400 text-[9px] font-black uppercase">Valid</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2.5">
-                        <div class="bg-black/25 rounded-xl p-3 border border-white/5">
-                            <p class="text-indigo-400 text-[8px] uppercase font-bold tracking-widest mb-1">Attendee</p>
-                            <p class="text-white font-bold text-sm truncate">{{ name }}</p>
-                        </div>
-                        <div class="bg-black/25 rounded-xl p-3 border border-white/5">
-                            <p class="text-indigo-400 text-[8px] uppercase font-bold tracking-widest mb-1">Entry Gate</p>
-                            <p class="text-white font-black text-2xl font-mono" id="gate-display">G{{ gate_id }}</p>
-                        </div>
-                        <div class="bg-black/25 rounded-xl p-3 border border-white/5">
-                            <p class="text-indigo-400 text-[8px] uppercase font-bold tracking-widest mb-1">Date</p>
-                            <p class="text-white font-bold text-sm">Apr 12, 2026</p>
-                        </div>
-                        <div class="bg-black/25 rounded-xl p-3 border border-white/5">
-                            <p class="text-indigo-400 text-[8px] uppercase font-bold tracking-widest mb-1">Seat Block</p>
-                            <p class="text-white font-bold text-sm">G{{ gate_id }}B · Row 14</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dashed tear line -->
-                <div class="mx-5 my-3 flex items-center">
-                    <div class="-ml-7 w-5 h-5 rounded-full bg-[#030303]"></div>
-                    <div class="flex-grow border-t-2 border-dashed border-white/10 mx-2"></div>
-                    <div class="-mr-7 w-5 h-5 rounded-full bg-[#030303]"></div>
-                </div>
-
-                <!-- QR section -->
-                <div class="px-6 pt-2 pb-6 flex flex-col items-center">
-                    <p class="text-indigo-300 text-[9px] uppercase font-black tracking-[0.2em] mb-4">Present at Gate Entry</p>
-                    <div class="relative cursor-pointer select-none" onclick="pulseQR()">
-                        <div class="bg-white p-4 rounded-2xl shadow-[0_0_50px_rgba(255,255,255,0.15)] hover:scale-105 active:scale-95 transition-transform" id="qr-wrap">
-                            <canvas id="qr"></canvas>
-                        </div>
-                        <div id="qr-check" class="absolute inset-0 flex items-center justify-center opacity-0 bg-green-500/90 rounded-2xl">
-                            <span class="text-4xl text-white font-black">✓</span>
-                        </div>
-                    </div>
-                    <p class="text-indigo-400/50 text-[9px] mt-3 font-mono text-center">{{ email }}</p>
-                </div>
-            </div>
+    <div class="glass rounded-2xl p-5 border border-white/5">
+      <h3 class="text-sm font-black mb-4 grad-text-green">📋 Entry Rules</h3>
+      <div class="space-y-2.5">
+        {% for rule in [('✓','Photo ID required at entry','#22c55e'),('✓','Gates open 3 hrs before match','#22c55e'),('✗','No outside food or camera lenses','#ef4444'),('✗','No re-entry after check-in','#ef4444')] %}
+        <div class="flex gap-3 items-start p-3 rounded-xl border" style="background:{{ 'rgba(34,197,94,0.05)' if rule[2]=='#22c55e' else 'rgba(239,68,68,0.05)' }};border-color:{{ 'rgba(34,197,94,0.15)' if rule[2]=='#22c55e' else 'rgba(239,68,68,0.12)' }}">
+          <span class="font-black shrink-0" style="color:{{ rule[2] }}">{{ rule[0] }}</span>
+          <p class="text-sm text-gray-300">{{ rule[1] }}</p>
         </div>
-
-        <!-- ═══ TAB: GATE STATUS ══════════════════════════════════════ -->
-        <div id="tab-gate" class="tab-panel space-y-4">
-            <!-- Status Card -->
-            <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-5 border border-white/5 shadow-2xl">
-                <div class="flex justify-between items-center mb-5">
-                    <div>
-                        <p class="text-gray-500 text-[9px] uppercase font-bold tracking-widest">Your Gate</p>
-                        <p class="text-2xl font-black">Gate <span id="gate-name-big">{{ gate_id }}</span></p>
-                    </div>
-                    <div class="flex items-center gap-2 border px-3 py-2 rounded-xl transition-all duration-500" id="status-badge" style="background:rgba(34,197,94,0.1); border-color:rgba(34,197,94,0.3)">
-                        <span class="w-2 h-2 rounded-full bg-green-500 pulse-dot"></span>
-                        <span class="text-green-400 text-xs font-bold uppercase tracking-widest" id="live-status">Open</span>
-                    </div>
-                </div>
-
-                <!-- Dual rings -->
-                <div class="grid grid-cols-2 gap-4 mb-5">
-                    <div class="text-center">
-                        <div class="relative w-24 h-24 mx-auto">
-                            <svg class="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-                                <circle cx="48" cy="48" r="38" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="9"/>
-                                <circle cx="48" cy="48" r="38" fill="none" stroke="#3b82f6" stroke-width="9"
-                                        stroke-dasharray="238.76" stroke-dashoffset="238.76" stroke-linecap="round" id="crowd-ring"/>
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-lg font-black font-mono" id="gate-crowd-pct">0%</span>
-                            </div>
-                        </div>
-                        <p class="text-gray-600 text-[9px] font-bold uppercase tracking-widest mt-2">Crowd Fill</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="relative w-24 h-24 mx-auto">
-                            <svg class="w-24 h-24 -rotate-90" viewBox="0 0 96 96">
-                                <circle cx="48" cy="48" r="38" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="9"/>
-                                <circle cx="48" cy="48" r="38" fill="none" stroke="#22c55e" stroke-width="9"
-                                        stroke-dasharray="238.76" stroke-dashoffset="59.69" stroke-linecap="round" id="wait-ring"/>
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-lg font-black font-mono text-green-400" id="wait-time">3m</span>
-                            </div>
-                        </div>
-                        <p class="text-gray-600 text-[9px] font-bold uppercase tracking-widest mt-2">Est. Wait</p>
-                    </div>
-                </div>
-
-                <div class="bg-black/40 rounded-xl p-3 border border-white/5">
-                    <div class="flex justify-between text-xs font-mono mb-2">
-                        <span class="text-gray-500">Crowd</span>
-                        <span class="text-white font-bold" id="gate-crowd">— / 200</span>
-                    </div>
-                    <div class="w-full bg-black/60 h-2 rounded-full overflow-hidden">
-                        <div id="gate-crowd-bar" class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full w-0 transition-all duration-1000"></div>
-                    </div>
-                    <p class="text-gray-600 text-[9px] mt-2 font-mono" id="gate-hint">Walk towards Gate {{ gate_id }} entrance</p>
-                </div>
-            </div>
-
-            <!-- Match Info -->
-            <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-5 border border-white/5 shadow-xl">
-                <h3 class="text-sm font-black mb-4 flex items-center gap-2">🏏 Match Info</h3>
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between items-center py-2 border-b border-white/5">
-                        <span class="text-gray-500 font-bold">Match</span>
-                        <span class="font-bold text-right">IPL Final 2026</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 border-b border-white/5">
-                        <span class="text-gray-500 font-bold">Teams</span>
-                        <span class="font-bold">RCB vs MI</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 border-b border-white/5">
-                        <span class="text-gray-500 font-bold">Toss</span>
-                        <span class="font-bold text-yellow-400">Apr 12 · 7:30 PM</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 border-b border-white/5">
-                        <span class="text-gray-500 font-bold">Gates Open</span>
-                        <span class="font-bold text-green-400">4:00 PM</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2">
-                        <span class="text-gray-500 font-bold">Venue</span>
-                        <span class="font-bold text-right text-xs">Narendra Modi Stadium<br>Ahmedabad</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══ TAB: NAVIGATE ═════════════════════════════════════════ -->
-        <div id="tab-map" class="tab-panel space-y-4">
-            <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-5 border border-white/5 shadow-2xl">
-                <div class="flex justify-between items-center mb-4">
-                    <div>
-                        <p class="text-gray-500 text-[9px] uppercase font-bold tracking-widest">AR Navigation</p>
-                        <p class="text-xl font-black">Route → Gate <span id="nav-gate">{{ gate_id }}</span></p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-gray-600 text-[9px] uppercase font-bold mb-0.5">ETA</p>
-                        <p class="text-green-400 font-black font-mono text-2xl" id="nav-eta">4:00</p>
-                    </div>
-                </div>
-
-                <!-- AR View -->
-                <div class="relative bg-black/50 rounded-2xl overflow-hidden border border-white/5" style="height:220px">
-                    <div class="absolute inset-0 scanlines pointer-events-none rounded-2xl"></div>
-                    <!-- Perspective grid -->
-                    <svg class="absolute inset-0 w-full h-full opacity-15" viewBox="0 0 300 220" preserveAspectRatio="none">
-                        <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0L0 0 0 40" fill="none" stroke="#6366f1" stroke-width="0.5"/></pattern></defs>
-                        <rect width="100%" height="100%" fill="url(#grid)"/>
-                        <line x1="150" y1="110" x2="0"   y2="220" stroke="#6366f1" stroke-width="0.4" opacity="0.5"/>
-                        <line x1="150" y1="110" x2="300" y2="220" stroke="#6366f1" stroke-width="0.4" opacity="0.5"/>
-                        <line x1="150" y1="110" x2="75"  y2="220" stroke="#6366f1" stroke-width="0.4" opacity="0.3"/>
-                        <line x1="150" y1="110" x2="225" y2="220" stroke="#6366f1" stroke-width="0.4" opacity="0.3"/>
-                    </svg>
-
-                    <!-- AR Path -->
-                    <div class="absolute inset-0 flex justify-center items-center">
-                        <svg viewBox="0 0 100 190" class="h-52 w-28 overflow-visible">
-                            <defs>
-                                <linearGradient id="pg" x1="0%" y1="100%" x2="0%" y2="0%">
-                                    <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.1"/>
-                                    <stop offset="50%" stop-color="#6366f1"/>
-                                    <stop offset="100%" stop-color="#22c55e"/>
-                                </linearGradient>
-                            </defs>
-                            <path id="ar-path" d="M 50 180 C 38 155, 62 120, 50 90 S 34 52, 50 20"
-                                  fill="none" stroke="url(#pg)" stroke-width="7" stroke-linecap="round"/>
-                            <circle id="ar-dest" cx="50" cy="20" r="10" fill="#22c55e" opacity="0"/>
-                            <circle id="ar-ring" cx="50" cy="20" r="22" fill="rgba(34,197,94,0.12)" opacity="0"/>
-                        </svg>
-                    </div>
-
-                    <!-- Chips -->
-                    <div class="absolute top-3 right-3 bg-indigo-600/80 backdrop-blur-md border border-indigo-400/30 rounded-xl px-3 py-2" id="direction-chip" style="opacity:0">
-                        <p class="text-white text-xs font-black">↑ Straight 45m</p>
-                    </div>
-                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
-                        <div class="w-3 h-3 rounded-full bg-blue-400 pulse-dot shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
-                        <span class="text-blue-400 text-[8px] font-bold uppercase">You</span>
-                    </div>
-                </div>
-
-                <!-- Steps -->
-                <div class="mt-4 space-y-2" id="nav-steps">
-                    <div class="flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3">
-                        <div class="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-xs shrink-0">1</div>
-                        <p class="text-sm font-bold text-white">Walk straight from main entrance (45m)</p>
-                    </div>
-                    <div class="flex items-center gap-3 bg-black/30 border border-white/5 rounded-xl p-3">
-                        <div class="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-gray-500 font-black text-xs shrink-0">2</div>
-                        <p class="text-sm font-bold text-gray-500">Turn right at security checkpoint (20m)</p>
-                    </div>
-                    <div class="flex items-center gap-3 bg-black/30 border border-white/5 rounded-xl p-3">
-                        <div class="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-gray-500 font-black text-xs shrink-0">3</div>
-                        <p class="text-sm font-bold text-gray-500">Reach Gate {{ gate_id }} — show QR to staff</p>
-                    </div>
-                </div>
-                <p class="text-gray-600 text-[10px] text-center mt-4 font-mono" id="status-hint">Keep straight towards Gate {{ gate_id }}</p>
-            </div>
-        </div>
-
-        <!-- ═══ TAB: INFO ═════════════════════════════════════════════ -->
-        <div id="tab-info" class="tab-panel space-y-4">
-            <!-- Venue Info -->
-            <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-5 border border-white/5 shadow-xl">
-                <h3 class="text-sm font-black mb-4 flex items-center gap-2">🏟 Venue Guide</h3>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
-                        <div class="text-2xl mb-1">🚻</div>
-                        <p class="text-white text-xs font-bold">Restrooms</p>
-                        <p class="text-gray-500 text-[10px] mt-0.5">Levels 1, 2, 3</p>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
-                        <div class="text-2xl mb-1">🍔</div>
-                        <p class="text-white text-xs font-bold">Food Court</p>
-                        <p class="text-gray-500 text-[10px] mt-0.5">Gate 3, 6, 9, 12</p>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
-                        <div class="text-2xl mb-1">🅿️</div>
-                        <p class="text-white text-xs font-bold">Parking</p>
-                        <p class="text-gray-500 text-[10px] mt-0.5">Lot A, B, C</p>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
-                        <div class="text-2xl mb-1">🏥</div>
-                        <p class="text-white text-xs font-bold">Medical</p>
-                        <p class="text-gray-500 text-[10px] mt-0.5">Gate 1, 7</p>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
-                        <div class="text-2xl mb-1">📶</div>
-                        <p class="text-white text-xs font-bold">Free WiFi</p>
-                        <p class="text-gray-500 text-[10px] mt-0.5">VenueFlow-Guest</p>
-                    </div>
-                    <div class="bg-black/40 rounded-xl p-3 border border-white/5 text-center">
-                        <div class="text-2xl mb-1">♿</div>
-                        <p class="text-white text-xs font-bold">Accessibility</p>
-                        <p class="text-gray-500 text-[10px] mt-0.5">Gates 1, 4, 7, 10</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rules -->
-            <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-5 border border-white/5 shadow-xl">
-                <h3 class="text-sm font-black mb-4 flex items-center gap-2">📋 Entry Rules</h3>
-                <div class="space-y-3">
-                    <div class="flex gap-3 items-start">
-                        <span class="text-green-400 font-black shrink-0">✓</span>
-                        <p class="text-sm text-gray-300">Valid photo ID required along with this e-ticket</p>
-                    </div>
-                    <div class="flex gap-3 items-start">
-                        <span class="text-green-400 font-black shrink-0">✓</span>
-                        <p class="text-sm text-gray-300">Gates open 3 hours before match. Arrive early!</p>
-                    </div>
-                    <div class="flex gap-3 items-start">
-                        <span class="text-red-400 font-black shrink-0">✗</span>
-                        <p class="text-sm text-gray-300">No outside food/beverages, cameras with detachable lenses</p>
-                    </div>
-                    <div class="flex gap-3 items-start">
-                        <span class="text-red-400 font-black shrink-0">✗</span>
-                        <p class="text-sm text-gray-300">No re-entry once checked in</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Emergency -->
-            <div class="bg-red-900/10 border border-red-500/20 rounded-2xl p-4 flex items-center gap-3">
-                <span class="text-2xl">🆘</span>
-                <div>
-                    <p class="text-red-400 font-black text-sm">Emergency Helpline</p>
-                    <p class="text-gray-400 text-xs">Call: +91-79-VENUE-911 · SMS: HELP to 56789</p>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
+      </div>
     </div>
 
-    <footer class="border-t border-white/5 py-3 px-5 flex justify-between items-center">
-        <span class="text-gray-500 text-[10px] font-mono">VenueFlow AI · Visitor Pass</span>
-        <span class="text-gray-500 text-[10px] font-mono">IPL Final · Apr 12, 2026</span>
-    </footer>
+    <div class="rounded-2xl p-4 flex items-center gap-3 border" style="background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.2)">
+      <span class="text-2xl">🆘</span>
+      <div>
+        <p class="text-sm font-black" style="color:#ef4444">Emergency Helpline</p>
+        <p class="text-xs text-gray-400">+91-79-VENUE-911 · SMS HELP to 56789</p>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
-    <script>
-        // ── Tab switching ────────────────────────────────────────────────
-        function switchTab(id, btn) {
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('tab-' + id).classList.add('active');
-            btn.classList.add('active');
-            // Animate in
-            gsap.from('#tab-' + id + ' > *', { y: 12, opacity: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out' });
-        }
+<footer class="relative z-10 border-t border-white/5 py-3 px-5 flex justify-between items-center">
+  <span class="text-gray-600 text-[10px] font-mono">VenueFlow AI · Visitor Pass</span>
+  <span class="text-gray-600 text-[10px] font-mono">IPL Final 2026</span>
+</footer>
 
-        // ── QR pulse on tap ─────────────────────────────────────────────
-        function pulseQR() {
-            gsap.to('#qr-check', { opacity:1, duration:0.2, onComplete: () => gsap.to('#qr-check', {opacity:0, duration:0.5, delay: 0.6}) });
-            if (navigator.vibrate) navigator.vibrate([100,50,100]);
-        }
+<script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
+<script>
+/* ── QR Code — white background, deep purple ink ─────────────── */
+window.addEventListener('load',()=>{
+  new QRious({
+    element: document.getElementById('qr'),
+    value: 'TICKET-{{ email }}-{{ gate_id }}',
+    size: 190,
+    background: '#ffffff',
+    foreground: '#1e1b4b',
+    backgroundAlpha: 1,
+    foregroundAlpha: 1,
+    level: 'H',
+    mime: 'image/png',
+    padding: 8
+  });
 
-        // ── QR Code gen ──────────────────────────────────────────────────
-        new QRious({
-            element: document.getElementById('qr'),
-            value: 'TICKET-{{ email }}-{{ gate_id }}',
-            size: 185, background: 'white', foreground: '#1e1b4b', level: 'H'
-        });
+  /* ── Entrance animations ──────────────────────────────────── */
+  gsap.to('#tab-ticket .ticket-bg',{opacity:1,y:0,duration:1,ease:'expo.out',delay:.1});
+  gsap.from('#qr-wrap',{scale:0,rotation:10,opacity:0,duration:1,ease:'back.out(2)',delay:.5});
 
-        // ── Countdown ETA timer ──────────────────────────────────────────
-        let etaSecs = 4 * 60;
-        const etaEl = document.getElementById('nav-eta');
-        setInterval(() => {
-            if (etaSecs > 0) { etaSecs--; etaEl.innerText = `${Math.floor(etaSecs/60)}:${String(etaSecs%60).padStart(2,'0')}`; }
-        }, 1000);
+  /* ── Draw AR path ─────────────────────────────────────────── */
+  const path=document.getElementById('ar-path');
+  const len=path.getTotalLength();
+  gsap.set(path,{strokeDasharray:len,strokeDashoffset:len});
+  gsap.to(path,{strokeDashoffset:0,duration:2.5,ease:'power2.inOut',delay:.5});
+  gsap.to('#ar-dest',{opacity:1,duration:.5,ease:'back.out(2)',delay:2.8});
+  gsap.to('#ar-ring', {opacity:1,duration:.4,delay:3});
+  gsap.to('#ar-chip', {opacity:1,duration:.4,delay:3.2});
+  gsap.to('#ar-ring', {attr:{r:30},opacity:0,duration:1.8,repeat:-1,ease:'power1.out',delay:3.5,transformOrigin:'50px 20px'});
 
-        // ── Entrance animations ──────────────────────────────────────────
-        window.addEventListener('load', () => {
-            gsap.to('.ticket-card', { opacity:1, y:0, duration: 1, ease:'expo.out', delay:0.1 });
-            gsap.from('#qr-wrap', { scale:0, rotation:8, opacity:0, duration:0.9, ease:'back.out(2)', delay:0.5 });
+  /* ── Countdown ETA ─────────────────────────────────────────── */
+  let s=4*60;
+  const etaEl=document.getElementById('nav-eta');
+  if(etaEl) setInterval(()=>{if(s>0){s--;etaEl.innerText=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}},1000);
 
-            // AR path draw
-            const path = document.getElementById('ar-path');
-            const len  = path.getTotalLength();
-            gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
-            gsap.to(path, { strokeDashoffset: 0, duration: 2.5, ease:'power2.inOut', delay:0.5 });
-            gsap.to('#ar-dest',  { opacity:1, duration:0.5, delay:2.8, ease:'back.out(2)' });
-            gsap.to('#ar-ring',  { opacity:1, duration:0.5, delay:3.0 });
-            gsap.to('#direction-chip', { opacity:1, duration:0.5, delay:3.2 });
-            gsap.to('#ar-ring',  { attr:{r:28}, opacity:0, duration:1.8, repeat:-1, ease:'power1.out', delay:3.5 });
+  initWebSockets('user',null,{{ gate_id }});
+});
 
-            initWebSockets('user', null, {{ gate_id }});
-        });
+/* ── Tab system ───────────────────────────────────────────────── */
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-pill').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  gsap.from('#tab-'+id+' > *',{y:14,opacity:0,duration:.5,stagger:.07,ease:'power3.out'});
+}
 
-        // ── Live gate status update (called by websocket.js) ────────────
-        function updateUserGateStatus(gateData, gateId) {
-            const key = `Gate ${gateId}`;
-            if (!gateData[key]) return;
-            const info = gateData[key];
-            const pct  = Math.round((info.current / info.max) * 100);
+/* ── QR tap flash ─────────────────────────────────────────────── */
+function pulseQR(){
+  gsap.to('#qr-flash',{opacity:1,duration:.15,onComplete:()=>gsap.to('#qr-flash',{opacity:0,duration:.5,delay:.4})});
+  gsap.fromTo('#qr-wrap',{scale:1.05},{scale:1,duration:.3,ease:'back.out(2)'});
+  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+}
 
-            document.getElementById('gate-crowd').innerText  = `${info.current} / ${info.max}`;
-            document.getElementById('gate-crowd-pct').innerText = `${pct}%`;
+/* ── Gate WS updates ──────────────────────────────────────────── */
+function updateUserGateStatus(gateData,gateId){
+  const key=`Gate ${gateId}`;
+  if(!gateData[key]) return;
+  const info=gateData[key];
+  const pct=Math.round((info.current/info.max)*100);
 
-            // Crowd ring (circumference = 2π×38 ≈ 238.76)
-            const offset = 238.76 - (pct / 100) * 238.76;
-            gsap.to('#crowd-ring', { attr:{'stroke-dashoffset': offset}, duration:1.5, ease:'power2.out' });
-            gsap.to('#gate-crowd-bar', { width:`${pct}%`, duration:1.5, ease:'expo.out' });
+  document.getElementById('gate-crowd').innerText=`${info.current} / ${info.max}`;
+  document.getElementById('gate-crowd-pct').innerText=`${pct}%`;
 
-            // Wait time estimate (inverse of fill)
-            const wait = Math.max(1, Math.round(8 * (1 - pct/100)));
-            document.getElementById('wait-time').innerText = `${wait}m`;
+  const offset=238.76-(pct/100)*238.76;
+  gsap.to('#crowd-ring',{attr:{'stroke-dashoffset':offset},duration:1.5,ease:'power2.out'});
+  gsap.to('#gate-crowd-bar',{width:`${pct}%`,duration:1.5,ease:'expo.out'});
 
-            const cfg = {
-                open:   { ring:'#3b82f6', bg:'rgba(34,197,94,0.1)',  border:'rgba(34,197,94,0.3)',  tc:'#22c55e', label:'Open',   hint:`Gate ${gateId} is clear. Walk straight.` },
-                busy:   { ring:'#facc15', bg:'rgba(250,204,21,0.1)',  border:'rgba(250,204,21,0.3)',  tc:'#facc15', label:'Busy',   hint:`Gate ${gateId} is busy. Approach carefully.` },
-                full:   { ring:'#ef4444', bg:'rgba(239,68,68,0.1)',   border:'rgba(239,68,68,0.3)',   tc:'#ef4444', label:'Full',   hint:`⚠️ Gate ${gateId} full. Await admin direction.` },
-                closed: { ring:'#6b7280', bg:'rgba(107,114,128,0.1)', border:'rgba(107,114,128,0.3)', tc:'#9ca3af', label:'Closed', hint:`⛔ Gate ${gateId} closed. Follow staff signs.` }
-            };
-            const c = cfg[info.status] || cfg.open;
-            document.getElementById('crowd-ring').style.stroke = c.ring;
+  const wait=Math.max(1,Math.round(8*(1-pct/100)));
+  document.getElementById('wait-time').innerText=`${wait}m`;
 
-            const badge = document.getElementById('status-badge');
-            const sTxt  = document.getElementById('live-status');
-            const hint  = document.getElementById('gate-hint');
-            badge.style.background   = c.bg;
-            badge.style.borderColor  = c.border;
-            sTxt.style.color         = c.tc;
-            sTxt.innerText           = c.label;
-            if (hint) hint.innerText = c.hint;
-        }
-    </script>
+  const cfg={
+    open:{stroke:'#3b82f6',bg:'rgba(34,197,94,0.1)',bc:'rgba(34,197,94,0.3)',tc:'#22c55e',label:'Open',hint:`Gate ${gateId} is clear — walk straight.`},
+    busy:{stroke:'#f59e0b',bg:'rgba(245,158,11,0.1)',bc:'rgba(245,158,11,0.3)',tc:'#f59e0b',label:'Busy',hint:`Gate ${gateId} is busy. Approach quickly.`},
+    full:{stroke:'#ef4444',bg:'rgba(239,68,68,0.1)',bc:'rgba(239,68,68,0.3)',tc:'#ef4444',label:'Full',hint:`⚠️ Gate ${gateId} full. Await admin redirect.`},
+    closed:{stroke:'#6b7280',bg:'rgba(107,114,128,0.1)',bc:'rgba(107,114,128,0.3)',tc:'#9ca3af',label:'Closed',hint:`⛔ Gate ${gateId} closed. Check with staff.`}
+  };
+  const c=cfg[info.status]||cfg.open;
+  document.getElementById('crowd-ring').style.stroke=c.stroke;
+  const badge=document.getElementById('live-badge');
+  const sTxt=document.getElementById('live-status');
+  badge.style.background=c.bg; badge.style.borderColor=c.bc;
+  sTxt.style.color=c.tc; sTxt.innerText=c.label;
+  const hint=document.getElementById('gate-hint');
+  if(hint) hint.innerText=c.hint;
+}
+</script>
 </body>
 </html>

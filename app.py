@@ -1,4 +1,5 @@
 import os
+import threading
 import requests as http_requests
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_socketio import SocketIO, emit, join_room
@@ -11,8 +12,8 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 GOOGLE_CLIENT_ID = "863719014670-0qs78m46r71c1r0o1e0useav95n2ss90.apps.googleusercontent.com"
 
-# Prepare D1 Schemas
-d1_client.init_db()
+# Run D1 schema init in background so Flask starts instantly
+threading.Thread(target=d1_client.init_db, daemon=True).start()
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -300,4 +301,4 @@ def broadcast_gates():
     socketio.emit('gate_update', data_dict)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    socketio.run(app, debug=False, use_reloader=False, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))

@@ -1,86 +1,122 @@
-/* VenueFlow Global Styles */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
+:root {
+  --neon-blue:    #3b82f6;
+  --neon-purple:  #8b5cf6;
+  --neon-cyan:    #06b6d4;
+  --neon-green:   #22c55e;
+  --neon-yellow:  #f59e0b;
+  --neon-pink:    #ec4899;
+  --neon-red:     #ef4444;
+  --bg-dark:      #030303;
+  --bg-card:      rgba(255,255,255,0.03);
+  --border-glow:  rgba(255,255,255,0.06);
 }
 
-/* Pulsing dot animation */
-.pulse-dot {
-    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
-}
-@keyframes pulse-ring {
-    0% { box-shadow: 0 0 0 0 currentColor; }
-    70% { box-shadow: 0 0 0 8px rgba(0,0,0,0); }
-    100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
-}
+body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+.font-mono { font-family: 'JetBrains Mono', monospace !important; }
 
-/* Glass morphism utility */
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
+
+/* ── Glass ─────────────────────────────────────────────────────── */
 .glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.glass-strong {
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
-/* Scanline overlay effect for cyberpunk feel */
-.scanlines::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(
-        0deg,
-        rgba(0,0,0,0.03) 0px,
-        rgba(0,0,0,0.03) 1px,
-        transparent 1px,
-        transparent 4px
-    );
-    pointer-events: none;
-    z-index: 1;
+/* ── Neon Glow Shadows ─────────────────────────────────────────── */
+.glow-blue   { box-shadow: 0 0 30px rgba(59,130,246,0.4), 0 0 60px rgba(59,130,246,0.1); }
+.glow-purple { box-shadow: 0 0 30px rgba(139,92,246,0.4), 0 0 60px rgba(139,92,246,0.1); }
+.glow-cyan   { box-shadow: 0 0 30px rgba(6,182,212,0.4),  0 0 60px rgba(6,182,212,0.1); }
+.glow-green  { box-shadow: 0 0 30px rgba(34,197,94,0.4),  0 0 60px rgba(34,197,94,0.1); }
+.glow-red    { box-shadow: 0 0 30px rgba(239,68,68,0.5),  0 0 60px rgba(239,68,68,0.1); }
+
+/* ── Pulse animation ───────────────────────────────────────────── */
+.pulse-dot { animation: pulse-ring 2s ease-in-out infinite; }
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+  50%       { box-shadow: 0 0 0 6px rgba(0,0,0,0); }
 }
 
-/* Smooth scrollbar */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-
-/* Number font override */
-.font-mono, [class*="font-mono"] { font-family: 'JetBrains Mono', monospace; }
-
-/* Glowing border animation */
-@keyframes border-glow {
-    0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
-    50% { box-shadow: 0 0 35px rgba(59, 130, 246, 0.7); }
-}
-.glow-blue { animation: border-glow 2s ease-in-out infinite; }
-
-@keyframes border-glow-red {
-    0%, 100% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
-    50% { box-shadow: 0 0 35px rgba(239, 68, 68, 0.7); }
-}
-.glow-red { animation: border-glow-red 2s ease-in-out infinite; }
-
-/* Loading shimmer */
-@keyframes shimmer {
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
-}
-.shimmer {
-    background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
-    background-size: 1000px 100%;
-    animation: shimmer 2s infinite;
-}
-
-/* Floating animation */
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-}
+/* ── Float ─────────────────────────────────────────────────────── */
 .float { animation: float 4s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
-/* QR container extra styling */
-#qr-container canvas { display: block; }
+/* ── Shimmer loading placeholder ──────────────────────────────── */
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+@keyframes shimmer { 0%{background-position:-1000px 0} 100%{background-position:1000px 0} }
+
+/* ── Scanlines ─────────────────────────────────────────────────── */
+.scanlines::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 3px);
+  pointer-events: none; z-index: 1;
+}
+
+/* ── 3D Card hover ─────────────────────────────────────────────── */
+.card-3d {
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.card-3d:hover {
+  transform: perspective(800px) rotateX(-2deg) rotateY(2deg) translateZ(8px) scale(1.01);
+}
+
+/* ── Neon border gradient animation ───────────────────────────── */
+@keyframes neon-border {
+  0%   { border-color: rgba(59,130,246,0.4); }
+  33%  { border-color: rgba(139,92,246,0.4); }
+  66%  { border-color: rgba(6,182,212,0.4); }
+  100% { border-color: rgba(59,130,246,0.4); }
+}
+.neon-border-anim { animation: neon-border 4s ease-in-out infinite; }
+
+/* ── Gradient text ─────────────────────────────────────────────── */
+.grad-text-blue    { background: linear-gradient(135deg, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.grad-text-purple  { background: linear-gradient(135deg, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.grad-text-gold    { background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.grad-text-green   { background: linear-gradient(135deg, #22c55e, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* ── Ticket shine ─────────────────────────────────────────────── */
+@keyframes shine {
+  0%   { transform: translateX(-100%) skewX(-20deg); }
+  100% { transform: translateX(250%) skewX(-20deg); }
+}
+.ticket-shine { animation: shine 3.5s infinite 1s; }
+
+/* ── Orbit rings (decorative) ─────────────────────────────────── */
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.orbit-1 { animation: orbit 8s linear infinite; }
+.orbit-2 { animation: orbit 12s linear infinite reverse; }
+
+/* ── Tab active state ─────────────────────────────────────────── */
+.tab-btn.active {
+  background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(6,182,212,0.1));
+  border-color: rgba(99,102,241,0.5);
+  color: white;
+  box-shadow: 0 0 20px rgba(99,102,241,0.2);
+}
+.tab-panel { display: none; animation: fadeUp 0.4s ease; }
+.tab-panel.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
