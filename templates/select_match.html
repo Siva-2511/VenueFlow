@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VenueFlow | Select Your Match</title>
+<meta name="description" content="Choose your IPL 2026 match to get your entry ticket.">
+<link rel="icon" href="/static/favicon.ico">
+<script>tailwind={config:{}}</script>
+<script src="/static/js/tailwind.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="/static/js/gsap.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.card{background:rgba(10,8,40,.85);backdrop-filter:blur(32px);border:1px solid rgba(99,102,241,.35);border-radius:24px;padding:36px;width:100%;max-width:540px;box-shadow:0 0 80px rgba(99,102,241,.15)}
+.hz-bar{height:3px;background:linear-gradient(90deg,#3b82f6,#6366f1,#8b5cf6,#ec4899,#06b6d4,#3b82f6);background-size:300% 100%;animation:flowbar 3s linear infinite;border-radius:99px;margin-bottom:28px}
+@keyframes flowbar{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.match-option{padding:14px 16px;border:1px solid rgba(99,102,241,.2);border-radius:12px;cursor:pointer;transition:all .25s;background:rgba(99,102,241,.05);margin-bottom:8px}
+.match-option:hover{background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.5);transform:translateX(4px)}
+.match-option.selected{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.6);box-shadow:0 0 20px rgba(99,102,241,.2)}
+.match-option.past{opacity:.45;cursor:not-allowed;pointer-events:none}
+.btn-main{width:100%;padding:15px;border:none;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-family:'Orbitron',monospace;font-weight:900;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;margin-top:20px;box-shadow:0 0 30px rgba(99,102,241,.35);transition:all .3s}
+.btn-main:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 0 50px rgba(99,102,241,.55)}
+.btn-main:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.scroll-list{max-height:380px;overflow-y:auto;padding-right:4px}
+.scroll-list::-webkit-scrollbar{width:3px}
+.scroll-list::-webkit-scrollbar-thumb{background:rgba(99,102,241,.4);border-radius:99px}
+.avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:900;font-size:16px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="fixed inset-0 pointer-events-none z-0">
+  <div class="orb-ambient" style="width:500px;height:500px;top:-100px;left:-100px;background:radial-gradient(circle,rgba(99,102,241,.12),transparent 65%)"></div>
+  <div class="orb-ambient" style="width:400px;height:400px;bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(6,182,212,.09),transparent 65%)"></div>
+</div>
+
+<div class="card relative z-10" id="card" style="opacity:0;transform:translateY(30px)">
+  <div class="hz-bar"></div>
+
+  <!-- Header -->
+  <div class="flex items-center gap-4 mb-6">
+    <div class="avatar">🏏</div>
+    <div>
+      <p class="font-orb text-[9px] font-black tracking-widest" style="color:rgba(255,255,255,.4)">WELCOME TO VENUEFLOW</p>
+      <h1 class="font-orb text-xl font-black mt-0.5" style="color:#fff">Select Your Match</h1>
+      <p class="text-[11px] mt-1 font-mono" style="color:rgba(255,255,255,.45)">Signed in as <span style="color:#818cf8">{{ email }}</span></p>
+    </div>
+  </div>
+
+  <p class="text-[12px] font-mono mb-4" style="color:rgba(255,255,255,.5)">Choose the IPL 2026 match you'll be attending. Your gate assignment will be generated automatically.</p>
+
+  <!-- Error msg -->
+  <div id="err-msg" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:11px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#fca5a5;margin-bottom:14px"></div>
+
+  <!-- Match list -->
+  <div class="scroll-list" id="match-list">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Confirm button -->
+  <button class="btn-main" id="confirm-btn" disabled onclick="confirmMatch()">
+    🎟 CONFIRM &amp; GET MY TICKET
+  </button>
+
+  <p class="text-center text-[9px] font-mono mt-4" style="color:rgba(255,255,255,.25)">🔒 Secured by VenueFlow AI · IPL 2026</p>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+const EMAIL = '{{ email }}';
+const TODAY = new Date().toISOString().split('T')[0];
+
+const IPL = [
+  {t:'RCB vs RR',  d:'2026-04-10',h:'19:30',v:'Barsapara Cricket Stadium, Guwahati'},
+  {t:'SRH vs PBKS',d:'2026-04-11',h:'15:30',v:'PCA Stadium, New Chandigarh'},
+  {t:'DC vs CSK',  d:'2026-04-11',h:'19:30',v:'MA Chidambaram Stadium, Chennai'},
+  {t:'GT vs LSG',  d:'2026-04-12',h:'15:30',v:'Ekana Cricket Stadium, Lucknow'},
+  {t:'RCB vs MI',  d:'2026-04-12',h:'19:30',v:'Wankhede Stadium, Mumbai'},
+  {t:'RR vs SRH',  d:'2026-04-13',h:'19:30',v:'Sawai Mansingh Stadium, Jaipur'},
+  {t:'KKR vs CSK', d:'2026-04-14',h:'19:30',v:'Eden Gardens, Kolkata'},
+  {t:'LSG vs RCB', d:'2026-04-15',h:'19:30',v:'Ekana Cricket Stadium, Lucknow'},
+  {t:'PBKS vs MI', d:'2026-04-16',h:'19:30',v:'Wankhede Stadium, Mumbai'},
+  {t:'KKR vs GT',  d:'2026-04-17',h:'19:30',v:'Narendra Modi Stadium, Ahmedabad'},
+  {t:'DC vs RCB',  d:'2026-04-18',h:'15:30',v:'Arun Jaitley Stadium, Delhi'},
+  {t:'CSK vs SRH', d:'2026-04-18',h:'19:30',v:'MA Chidambaram Stadium, Chennai'},
+  {t:'RR vs KKR',  d:'2026-04-19',h:'15:30',v:'Eden Gardens, Kolkata'},
+  {t:'LSG vs PBKS',d:'2026-04-19',h:'19:30',v:'PCA Stadium, New Chandigarh'},
+  {t:'MI vs GT',   d:'2026-04-20',h:'19:30',v:'Narendra Modi Stadium, Ahmedabad'},
+  {t:'DC vs SRH',  d:'2026-04-21',h:'19:30',v:'Rajiv Gandhi Intl Stadium, Hyderabad'},
+  {t:'RR vs LSG',  d:'2026-04-22',h:'19:30',v:'Ekana Cricket Stadium, Lucknow'},
+  {t:'CSK vs MI',  d:'2026-04-23',h:'19:30',v:'Wankhede Stadium, Mumbai'},
+  {t:'GT vs RCB',  d:'2026-04-24',h:'19:30',v:'Narendra Modi Stadium, Ahmedabad'},
+  {t:'PBKS vs DC', d:'2026-04-25',h:'15:30',v:'Arun Jaitley Stadium, Delhi'},
+  {t:'SRH vs RR',  d:'2026-04-25',h:'19:30',v:'Sawai Mansingh Stadium, Jaipur'},
+  {t:'CSK vs GT',  d:'2026-04-26',h:'15:30',v:'Narendra Modi Stadium, Ahmedabad'},
+  {t:'KKR vs LSG', d:'2026-04-26',h:'19:30',v:'Ekana Cricket Stadium, Lucknow'},
+  {t:'RCB vs DC',  d:'2026-04-27',h:'19:30',v:'Arun Jaitley Stadium, Delhi'},
+  {t:'RR vs PBKS', d:'2026-04-28',h:'19:30',v:'PCA Stadium, New Chandigarh'},
+  {t:'SRH vs MI',  d:'2026-04-29',h:'19:30',v:'Wankhede Stadium, Mumbai'},
+  {t:'RCB vs GT',  d:'2026-04-30',h:'19:30',v:'Narendra Modi Stadium, Ahmedabad'},
+  {t:'DC vs RR',   d:'2026-05-01',h:'19:30',v:'Sawai Mansingh Stadium, Jaipur'},
+  {t:'MI vs CSK',  d:'2026-05-02',h:'19:30',v:'MA Chidambaram Stadium, Chennai'},
+  {t:'KKR vs SRH', d:'2026-05-03',h:'15:30',v:'Rajiv Gandhi Intl Stadium, Hyderabad'},
+  {t:'PBKS vs GT', d:'2026-05-03',h:'19:30',v:'Narendra Modi Stadium, Ahmedabad'},
+  {t:'MI vs RCB',  d:'2026-05-10',h:'19:30',v:'Shaheed Veer Narayan Stadium, Raipur'},
+  {t:'RCB vs SRH', d:'2026-05-22',h:'19:30',v:'Rajiv Gandhi Intl Stadium, Hyderabad'},
+  {t:'IPL Final',  d:'2026-05-26',h:'19:30',v:'Narendra Modi Stadium, Ahmedabad'},
+];
+
+let selectedIdx = null;
+
+function fmtDate(d){
+  const dt = new Date(d+'T00:00:00');
+  return dt.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+}
+
+function buildList(){
+  const list = document.getElementById('match-list');
+  list.innerHTML = '';
+  // Show only future matches first, then past
+  const future = IPL.map((m,i)=>({...m,i})).filter(m=>m.d>=TODAY);
+  const past   = IPL.map((m,i)=>({...m,i})).filter(m=>m.d<TODAY);
+
+  if(future.length){
+    const lbl=document.createElement('p');
+    lbl.style.cssText='font-family:JetBrains Mono,monospace;font-size:9px;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.12em;margin-bottom:8px;margin-top:4px';
+    lbl.textContent='UPCOMING MATCHES';
+    list.appendChild(lbl);
+  }
+  [...future, ...(past.length ? [{divider:true}] : []), ...past].forEach(item=>{
+    if(item.divider){
+      const sep=document.createElement('p');
+      sep.style.cssText='font-family:JetBrains Mono,monospace;font-size:9px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:.12em;margin:12px 0 8px';
+      sep.textContent='PAST MATCHES (unavailable)';
+      list.appendChild(sep); return;
+    }
+    const isPast = item.d < TODAY;
+    const div = document.createElement('div');
+    div.className = 'match-option' + (isPast?' past':'');
+    div.dataset.idx = item.i;
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div style="min-width:0">
+          <p style="font-family:'Orbitron',monospace;font-weight:900;font-size:13px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${item.t}</p>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,.5);margin-top:3px">🏟 ${item.v}</p>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <p style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#f59e0b;white-space:nowrap">${fmtDate(item.d)}</p>
+          <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,.4);margin-top:2px">⏰ ${item.h} IST</p>
+        </div>
+      </div>`;
+    if(!isPast) div.addEventListener('click', ()=>selectMatch(item.i, div));
+    list.appendChild(div);
+    if(!isPast) gsap.from(div,{opacity:0,x:-12,duration:.35,delay:future.indexOf(item)*.04});
+  });
+}
+
+function selectMatch(idx, el){
+  selectedIdx = idx;
+  document.querySelectorAll('.match-option').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('confirm-btn').disabled = false;
+  gsap.fromTo(el,{borderColor:'rgba(99,102,241,.9)'},{borderColor:'rgba(99,102,241,.5)',duration:.8});
+}
+
+function confirmMatch(){
+  if(selectedIdx === null) return;
+  const m = IPL[selectedIdx];
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true; btn.textContent = 'ASSIGNING GATE...';
+  const errEl = document.getElementById('err-msg');
+  errEl.style.display = 'none';
+
+  fetch('/select_match', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    credentials: 'same-origin',
+    body: JSON.stringify({
+      match_name: `IPL 2026 — ${m.t}`,
+      match_teams: m.t,
+      match_date: m.d,
+      match_time: m.h,
+      match_venue: m.v
+    })
+  }).then(r=>r.json()).then(d=>{
+    if(d.status==='success'){
+      btn.textContent = '✓ TICKET READY — LOADING...';
+      btn.style.background = 'linear-gradient(135deg,#22c55e,#06b6d4)';
+      setTimeout(()=>window.location.href=d.redirect, 700);
+    } else {
+      errEl.textContent = d.message || 'Error. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '🎟 CONFIRM & GET MY TICKET';
+    }
+  }).catch(()=>{
+    errEl.textContent = 'Network error. Please try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '🎟 CONFIRM & GET MY TICKET';
+  });
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  buildList();
+  gsap.to('#card',{opacity:1,y:0,duration:.8,ease:'expo.out'});
+});
+</script>
+</body>
+</html>

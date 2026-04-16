@@ -34,28 +34,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         fetch('/scan_qr', {
                             method: 'POST',
-                            headers:{ 'Content-Type': 'application/json' },
+                            headers:{
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            credentials: 'same-origin',
                             body: JSON.stringify({ qr_data: result.text })
-                        }).then(r=>r.json()).then(data => {
+                        }).then(r => {
+                            if (r.status === 403) throw new Error('Not authorized — please log in as staff');
+                            if (r.status === 401) throw new Error('Session expired — please refresh and log in');
+                            return r.json();
+                        }).then(data => {
                             if(data.status === 'success') {
                                 scanFrame.className = 'absolute inset-0 border-4 border-solid border-green-500 pointer-events-none rounded-[2rem] m-6 z-10 transition-colors shadow-[inset_0_0_30px_rgba(34,197,94,0.6)]';
                                 scanSuccess.classList.remove('hidden');
                                 gsap.fromTo(scanSuccess, {scale: 0.5, opacity: 0}, {scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2)"});
                                 resultElement.innerHTML = `<span class="text-green-500 font-black text-xl drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]">ACCESS GRANTED</span>`;
                                 
-                                // Specific feature: Update entry list seamlessly
                                 if(entryList) {
                                     if(entryList.innerHTML.includes('Waiting for scans')) entryList.innerHTML = '';
                                     const entry = document.createElement('div');
                                     entry.className = "bg-gradient-to-r from-gray-900 to-black border border-gray-800 p-4 rounded-xl flex justify-between items-center text-xs font-mono text-gray-300 shadow-xl";
                                     const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-                                    entry.innerHTML = `<span class="text-blue-400 font-bold tracking-widest uppercase">USER</span> <span class="text-gray-100 font-bold px-2">${data.user}</span> <span class="bg-black py-1 px-2 rounded-lg text-gray-500">${time}</span>`;
+                                    const ud = data.user_data || {};
+                                    const pastWarn = data.match_past ? '<span style="color:#fbbf24;font-size:9px;margin-left:6px">⚠️ PAST</span>' : '';
+                                    entry.innerHTML = `<span class="text-blue-400 font-bold tracking-widest uppercase">IN</span> <span class="text-gray-100 font-bold px-2">${ud.name||data.user}</span>${pastWarn} <span class="bg-black py-1 px-2 rounded-lg text-gray-500">${time}</span>`;
                                     entryList.prepend(entry);
                                     gsap.from(entry, { x: -50, opacity: 0, scale: 0.9, duration: 0.6, ease: "elastic.out(1, 0.75)" });
                                 }
 
                             } else {
-                                // Double entry or closed fail state
                                 resultElement.innerHTML = `<span class="text-red-500 font-black text-xl drop-shadow-[0_0_15px_rgba(239,68,68,0.7)] uppercase">${data.message}</span>`;
                                 scanFrame.className = 'absolute inset-0 border-4 border-solid border-red-500 pointer-events-none rounded-[2rem] m-6 z-10 transition-colors shadow-[inset_0_0_50px_rgba(239,68,68,0.8)]';
                                 gsap.fromTo(scanFrame, { x: -10 }, { x: 10, yoyo: true, repeat: 7, duration: 0.05 });
@@ -68,6 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 resultElement.innerHTML = "<span class='text-gray-500 uppercase tracking-widest font-bold text-[10px]'>Awaiting optic link...</span>";
                                 isScanning = true;
                             }, 2500);
+                        }).catch(err => {
+                            resultElement.innerHTML = `<span class="text-red-400 font-bold text-sm">${err.message || 'Network error'}</span>`;
+                            scanFrame.className = 'absolute inset-0 border-4 border-solid border-red-500 pointer-events-none rounded-[2rem] m-6 z-10';
+                            setTimeout(() => {
+                                scanFrame.className = 'absolute inset-0 border-2 border-dashed border-white/20 pointer-events-none rounded-[2rem] m-6 z-10';
+                                resultElement.innerHTML = "<span class='text-gray-500 uppercase tracking-widest font-bold text-[10px]'>Awaiting optic link...</span>";
+                                isScanning = true;
+                            }, 3000);
                         });
                     }
                 });

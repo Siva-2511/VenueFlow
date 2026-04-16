@@ -1,9 +1,88 @@
 // --- Service Worker Registration ---
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js');
+        navigator.serviceWorker.register('/static/service-worker.js').catch(()=>{});
     });
 }
+
+/* ══ Scroll-Reveal (IntersectionObserver + MutationObserver for dynamic elements) ══ */
+const _revealElements = () => {
+    if (!('IntersectionObserver' in window)) return;
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); obs.unobserve(e.target); } });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.reveal:not(.revealed)').forEach(el => obs.observe(el));
+};
+_revealElements();
+// Observe dynamic additions
+if ('MutationObserver' in window) {
+    new MutationObserver(_revealElements).observe(document.body, { childList: true, subtree: true });
+}
+
+/* ══ Click Ripple on all buttons ══ */
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('button, .ripple-host, a[class*="btn"]');
+    if (!btn) return;
+    const r = document.createElement('span');
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.className = 'ripple-dot';
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    btn.style.position = btn.style.position || 'relative';
+    btn.style.overflow = 'hidden';
+    btn.appendChild(r);
+    setTimeout(() => r.remove(), 700);
+});
+
+/* ══ Particle Burst on button clicks ══ */
+const PARTICLE_COLORS = ['#3b82f6','#8b5cf6','#06b6d4','#ec4899','#22c55e','#f59e0b'];
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('button:not([disabled]), .particle-burst');
+    if (!btn) return;
+    const count = 6;
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const angle = (i / count) * 360;
+        const dist = 30 + Math.random() * 20;
+        const tx = Math.cos(angle * Math.PI / 180) * dist;
+        const ty = Math.sin(angle * Math.PI / 180) * dist - 20;
+        p.style.cssText = `
+            left:${e.clientX}px;top:${e.clientY}px;
+            background:${PARTICLE_COLORS[i % PARTICLE_COLORS.length]};
+            --tx:${tx}px;--ty:${ty}px;
+            position:fixed;z-index:9999;
+        `;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 900);
+    }
+});
+
+/* ══ Number-flash on counter updates ══ */
+window.addNumFlash = function(el) {
+    if (!el) return;
+    el.classList.remove('num-flash', 'kpi-flash');
+    void el.offsetWidth;
+    el.classList.add('num-flash');
+    el.closest('.kpi-card')?.classList.add('kpi-flash');
+    setTimeout(() => el.closest('.kpi-card')?.classList.remove('kpi-flash'), 900);
+};
+
+/* ══ Cursor glow (desktop only) ══ */
+if (window.matchMedia('(pointer:fine)').matches) {
+    const cursor = document.createElement('div');
+    cursor.style.cssText = 'position:fixed;width:16px;height:16px;border-radius:50%;background:rgba(99,102,241,.4);border:1px solid rgba(99,102,241,.6);pointer-events:none;z-index:99999;transition:transform .1s,opacity .2s;transform:translate(-50%,-50%);mix-blend-mode:screen';
+    document.body.appendChild(cursor);
+    document.addEventListener('mousemove', e => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+    });
+    document.addEventListener('mousedown', () => { cursor.style.transform = 'translate(-50%,-50%) scale(1.8)'; cursor.style.background = 'rgba(6,182,212,.5)'; });
+    document.addEventListener('mouseup',   () => { cursor.style.transform = 'translate(-50%,-50%) scale(1)';   cursor.style.background = 'rgba(99,102,241,.4)'; });
+    document.addEventListener('mouseleave', () => { cursor.style.opacity = '0'; });
+    document.addEventListener('mouseenter', () => { cursor.style.opacity = '1'; });
+}
+
 
 // --- Theme Toggle ---
 const themeToggleBtn = document.getElementById('theme-toggle');

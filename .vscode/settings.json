@@ -1,0 +1,12 @@
+{
+  "python.defaultInterpreterPath": "D:\\Program Files\\python3.10\\python.exe",
+  "python.analysis.extraPaths": [
+    "D:\\Program Files\\python3.10\\Lib\\site-packages"
+  ],
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "[html]": {
+    "editor.formatOnSave": false
+  }
+}
