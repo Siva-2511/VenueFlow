@@ -19,7 +19,7 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%);min-
 .match-option{padding:14px 16px;border:1px solid rgba(99,102,241,.2);border-radius:12px;cursor:pointer;transition:all .25s;background:rgba(99,102,241,.05);margin-bottom:8px}
 .match-option:hover{background:rgba(99,102,241,.15);border-color:rgba(99,102,241,.5);transform:translateX(4px)}
 .match-option.selected{background:rgba(99,102,241,.2);border-color:rgba(99,102,241,.6);box-shadow:0 0 20px rgba(99,102,241,.2)}
-.match-option.past{opacity:.45;cursor:not-allowed;pointer-events:none}
+.match-option.past{opacity:.7;cursor:not-allowed;pointer-events:none}
 .btn-main{width:100%;padding:15px;border:none;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-family:'Orbitron',monospace;font-weight:900;font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;margin-top:20px;box-shadow:0 0 30px rgba(99,102,241,.35);transition:all .3s}
 .btn-main:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 0 50px rgba(99,102,241,.55)}
 .btn-main:disabled{opacity:.4;cursor:not-allowed;transform:none}
@@ -131,7 +131,7 @@ function buildList(){
   [...future, ...(past.length ? [{divider:true}] : []), ...past].forEach(item=>{
     if(item.divider){
       const sep=document.createElement('p');
-      sep.style.cssText='font-family:JetBrains Mono,monospace;font-size:9px;font-weight:700;color:rgba(255,255,255,.2);letter-spacing:.12em;margin:12px 0 8px';
+      sep.style.cssText='font-family:JetBrains Mono,monospace;font-size:9px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.12em;margin:12px 0 8px';
       sep.textContent='PAST MATCHES (unavailable)';
       list.appendChild(sep); return;
     }
