@@ -49,6 +49,7 @@ GOOGLE_CLIENT_ID     = os.environ.get('GOOGLE_CLIENT_ID', '863719014670-0qs78m46
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '')
 # Optional: hard-code callback URL for production (e.g. https://yourdomain.com/auth/google/callback)
 GOOGLE_REDIRECT_URI  = os.environ.get('GOOGLE_REDIRECT_URI', '')
+GOOGLE_MAPS_API_KEY  = os.environ.get('GOOGLE_MAPS_API_KEY', '')
 
 # Run D1 schema init in background so Flask starts instantly
 threading.Thread(target=d1_client.init_db, daemon=True).start()
