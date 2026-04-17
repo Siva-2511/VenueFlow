@@ -711,6 +711,19 @@ def gate_users(gate_id):
         'no_entry': len(no_entry_list),
         'users':    users
     })
+@app.route('/api/admin/ai_insight')
+@login_required
+def get_ai_insight():
+    if current_user.role != 'admin':
+        return jsonify({'status':'error','message':'Unauthorized'}), 403
+    
+    stats = d1_client.execute(
+        '''SELECT assigned_gate as gate_id, COUNT(id) as count
+           FROM users WHERE assigned_gate IS NOT NULL GROUP BY assigned_gate'''
+    )
+    from gemini_agent import analyze_crowd_data
+    insight = analyze_crowd_data(str(stats))
+    return jsonify({'insight': insight, 'status': 'success'})
 
 
 if __name__ == '__main__':

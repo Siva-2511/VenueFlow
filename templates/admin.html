@@ -6,12 +6,13 @@
 <title>VenueFlow AI | Admin Command Grid</title>
 <link rel="icon" href="/static/favicon.ico">
 <script>tailwind={config:{}}</script>
-<script src="/static/js/tailwind.min.js"></script>
-<script src="/static/js/gsap.min.js"></script>
+<script>const __origWarn = console.warn; console.warn = function(...args){ if(typeof args[0]==="string" && args[0].includes("cdn.tailwindcss"))return; __origWarn.apply(console, args); };</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<script src="/static/js/socket.io.min.js"></script>
-<script src="/static/js/three.min.js"></script>
-<script src="/static/js/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body{background:#020010;overflow-x:hidden}
 #stadium-canvas{position:absolute;inset:0;z-index:0;border-radius:1rem}
@@ -135,6 +136,13 @@ body{background:#020010;overflow-x:hidden}
             <div class="absolute inset-0 rounded-full" style="background:rgba(255,255,255,.15);animation:shim 1.5s linear infinite;background-size:400px 100%"></div>
           </div>
         </div>
+
+      <!-- AI Insight -->
+      <div class="mt-4 p-3 rounded-xl border" style="background:rgba(99,102,241,.05);border-color:rgba(99,102,241,.2)">
+        <h3 class="font-orb text-[9px] font-black uppercase text-indigo-400 mb-1 flex items-center gap-1.5">
+          <span>✨</span> GEMINI AI CROWD INSIGHT
+        </h3>
+        <p class="text-[10px] font-mono text-gray-300 leading-relaxed" id="ai-insight-text">Fetching strategic recommendations...</p>
       </div>
     </div>
 
@@ -417,6 +425,25 @@ window._updateTotalCrowdKPI=(total,max)=>{
   const pctEl=document.getElementById('kpi-pct');
   if(pctEl){const pct=max>0?Math.round(total/max*100):0;pctEl.innerText=pct+'%';}
 };
+
+
+function fetchAIInsights() {
+  fetch('/api/admin/ai_insight')
+    .then(r => r.json())
+    .then(d => {
+      if (d.status === 'success' && d.insight) {
+        const el = document.getElementById('ai-insight-text');
+        gsap.to(el, {opacity: 0, duration: 0.3, onComplete: () => {
+          el.innerText = d.insight;
+          gsap.to(el, {opacity: 1, duration: 0.5});
+        }});
+      }
+    }).catch(e => console.error("AI Insight Error:", e));
+}
+// Fetch immediately and every 30 seconds
+setTimeout(fetchAIInsights, 2000);
+setInterval(fetchAIInsights, 30000);
+
 </script>
 </body>
 </html>

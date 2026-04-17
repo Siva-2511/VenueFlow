@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VenueFlow | IPL 2026 — Your E-Ticket</title>
-<script src="/static/js/socket.io.min.js"></script>
-<script src="/static/js/qrious.min.js"></script>
-<script src="/static/js/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script>tailwind={config:{}}</script>
-<script src="/static/js/tailwind.min.js"></script>
+<script>const __origWarn = console.warn; console.warn = function(...args){ if(typeof args[0]==="string" && args[0].includes("cdn.tailwindcss"))return; __origWarn.apply(console, args); };</script>
+<script src="https://cdn.tailwindcss.com"></script>
 <style>
 body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
 
@@ -118,21 +119,21 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
 </div>
 
 <!-- Tab Bar -->
-<div class="sticky z-40 glass-bright border-b border-indigo-500/10 px-4 py-2" style="top:57px">
-  <div class="flex gap-1.5 max-w-lg mx-auto">
-    <button class="tab-pill active" onclick="switchTab('ticket',this)">🎟 Ticket</button>
-    <button class="tab-pill" onclick="switchTab('gate',this)">🚦 Gate</button>
-    <button class="tab-pill" onclick="switchTab('map',this)">🗺 Nav</button>
-    <button class="tab-pill" onclick="switchTab('fan',this)">🔥 Fan</button>
-    <button class="tab-pill" onclick="switchTab('info',this)">📋 Info</button>
+<nav class="sticky z-40 glass-bright border-b border-indigo-500/10 px-4 py-2" style="top:57px" aria-label="Dashboard Tabs">
+  <div class="flex gap-1.5 max-w-lg mx-auto" role="tablist">
+    <button class="tab-pill active" onclick="switchTab('ticket',this)" role="tab" aria-selected="true" aria-controls="tab-ticket">🎟 Ticket</button>
+    <button class="tab-pill" onclick="switchTab('gate',this)" role="tab" aria-selected="false" aria-controls="tab-gate">🚦 Gate</button>
+    <button class="tab-pill" onclick="switchTab('map',this)" role="tab" aria-selected="false" aria-controls="tab-map">🗺 Nav</button>
+    <button class="tab-pill" onclick="switchTab('fan',this)" role="tab" aria-selected="false" aria-controls="tab-fan">🔥 Fan</button>
+    <button class="tab-pill" onclick="switchTab('info',this)" role="tab" aria-selected="false" aria-controls="tab-info">📋 Info</button>
   </div>
-</div>
+</nav>
 
-<div class="flex-grow relative z-10 max-w-lg mx-auto px-4 pt-4 pb-8 w-full">
+<main class="flex-grow relative z-10 max-w-lg mx-auto px-4 pt-4 pb-8 w-full" aria-label="Main Dashboard Content">
 
   <!-- ══════════ TICKET ══════════ -->
-  <div id="tab-ticket" class="tab-p active space-y-4">
-    <div class="ticket-holo rounded-3xl overflow-hidden relative" id="ticket-card" style="opacity:0;transform:translateY(24px)">
+  <section id="tab-ticket" class="tab-p active space-y-4" aria-labelledby="tab-ticket-title">
+    <div class="ticket-holo rounded-3xl overflow-hidden relative" id="ticket-card" style="opacity:0;transform:translateY(24px)" role="region" aria-label="Your E-Ticket">
       <div class="foil3 absolute inset-0 z-10 pointer-events-none"></div>
       <div class="shine-sweep z-20" style="left:-80px"></div>
       <div class="ticket-orbit1"></div>
@@ -431,7 +432,7 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
       </div>
     </div>
   </div>
-</div>
+</main>
 
 <!-- Footer — visible on all themes -->
 <footer class="vf-footer relative z-10">

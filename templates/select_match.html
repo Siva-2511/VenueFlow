@@ -7,9 +7,10 @@
 <meta name="description" content="Choose your IPL 2026 match to get your entry ticket.">
 <link rel="icon" href="/static/favicon.ico">
 <script>tailwind={config:{}}</script>
-<script src="/static/js/tailwind.min.js"></script>
+<script>const __origWarn = console.warn; console.warn = function(...args){ if(typeof args[0]==="string" && args[0].includes("cdn.tailwindcss"))return; __origWarn.apply(console, args); };</script>
+<script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<script src="/static/js/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
