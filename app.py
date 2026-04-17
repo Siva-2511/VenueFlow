@@ -454,7 +454,8 @@ def user_dashboard():
         name=name, email=current_user.email, gate_id=assigned_gate,
         match_name=match_name, match_teams=match_teams,
         match_date=match_date, match_time=match_time,
-        match_venue=match_venue, match_dt=match_dt
+        match_venue=match_venue, match_dt=match_dt,
+        maps_key=GOOGLE_MAPS_API_KEY
     )
 
 # --- STATS API (used by admin dashboard to restore flow chart total on refresh) ---

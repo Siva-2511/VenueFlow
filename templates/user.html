@@ -305,12 +305,23 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
           <line x1="150" y1="110" x2="0" y2="220" stroke="#818cf8" stroke-width=".7" opacity=".6"/>
           <line x1="150" y1="110" x2="300" y2="220" stroke="#818cf8" stroke-width=".7" opacity=".6"/>
         </svg>
+        {% if maps_key and maps_key != 'REPLACE_WITH_YOUR_KEY' %}
         <!-- Google Maps Embed for Stadium Location -->
         <div class="absolute inset-0 z-0 opacity-40">
            <iframe width="100%" height="100%" frameborder="0" style="border:0" 
-             src="https://www.google.com/maps/embed/v1/place?key=REPLACE_WITH_YOUR_KEY&q=Narendra+Modi+Stadium" allowfullscreen aria-hidden="true">
+             src="https://www.google.com/maps/embed/v1/place?key={{ maps_key }}&q=Narendra+Modi+Stadium" allowfullscreen aria-hidden="true">
            </iframe>
         </div>
+        {% else %}
+        <!-- Placeholder for missing Maps Key -->
+        <div class="absolute inset-0 z-0 flex flex-col items-center justify-center p-8 text-center" style="background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(6,182,212,.05))">
+          <div class="text-4xl mb-3 opacity-40">📍</div>
+          <p class="font-orb text-[10px] font-black tracking-widest text-indigo-400 mb-4">VENUE LOCATION</p>
+          <a href="https://www.google.com/maps/search/?api=1&query=Narendra+Modi+Stadium" target="_blank" class="px-5 py-2.5 rounded-xl border border-indigo-500/30 font-orb text-[8px] font-black uppercase tracking-widest hover:bg-indigo-500/10 transition-all">
+            Open in Google Maps ↗
+          </a>
+        </div>
+        {% endif %}
         <div class="absolute inset-0 flex justify-center items-center z-10">
           <svg viewBox="0 0 100 190" style="height:205px;width:110px;overflow:visible">
             <defs>

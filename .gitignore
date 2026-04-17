@@ -1,16 +1,23 @@
-.env
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.db
-*.sqlite3
-venv/
+*.py[cod]
+*$py.class
 .venv/
 env/
-*.egg-info/
-dist/
-build/
+venv/
+ENV/
+*.env
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
 .DS_Store
 Thumbs.db
+
+# Flask/Render
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
