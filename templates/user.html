@@ -140,6 +140,10 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
         Consulting VenueFlow AI for your best entry strategy...
       </p>
     </div>
+    <!-- Simple fallback link for when AI is at capacity -->
+    <div id="ai-quota-hint" class="mt-2 text-[8px] text-indigo-400 font-bold uppercase hidden">
+      AI Busy: Using Standard Entry Guidelines
+    </div>
   </div>
 
   <!-- ══════════ TICKET ══════════ -->
@@ -207,7 +211,7 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
         <p class="font-orb text-[9px] mt-1" style="color:rgba(255,255,255,.55);letter-spacing:.14em">TAP QR TO VERIFY · GATE {{ gate_id }}</p>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- ══════════ GATE ══════════ -->
   <div id="tab-gate" class="tab-p space-y-4">

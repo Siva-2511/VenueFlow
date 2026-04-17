@@ -22,7 +22,10 @@ def analyze_crowd_data(gate_data):
         )
         return response.text
     except Exception as e:
-        return f"AI Insight Unavailable: {str(e)}"
+        error_str = str(e)
+        if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+            return "VenueFlow AI insight is temporarily unavailable due to high demand. Please try again in 30 seconds! 🏏"
+        return f"AI Insight Unavailable: {error_str}"
 
 def get_chat_response(message, role, context_data):
     """
@@ -52,11 +55,18 @@ def get_chat_response(message, role, context_data):
             "Response (concise, professional, and emoji-friendly):"
         )
 
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            config={'system_instruction': system_instruction},
-            contents=full_prompt,
-        )
-        return response.text
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.0-flash',
+                config={'system_instruction': system_instruction},
+                contents=full_prompt,
+            )
+            return response.text
+        except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                return "VenueFlow AI is currently handling a high volume of requests. Please try again in a few moments! 🏏"
+            print(f"Gemini API Error: {e}")
+            return "I'm having trouble connecting to my knowledge base right now. Please try again later."
     except Exception as e:
         return f"Bot Error: {str(e)}"
