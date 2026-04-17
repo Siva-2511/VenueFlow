@@ -28,7 +28,10 @@ except ImportError:
 
 from datetime import timedelta
 app = Flask(__name__)
-app.config['SECRET_KEY']                = os.environ.get('SECRET_KEY', 'venueflow-ultra-secret-2026-!@#$%')
+app.config['SECRET_KEY']                = os.environ.get('SECRET_KEY') or (
+    'venueflow-dev-only-secret-change-in-prod' if not os.environ.get('RENDER')
+    else (_ for _ in ()).throw(RuntimeError('SECRET_KEY env var must be set in production!'))
+)
 app.config['SESSION_COOKIE_HTTPONLY']   = True
 app.config['SESSION_COOKIE_SAMESITE']  = 'Lax'
 app.config['SESSION_COOKIE_SECURE']    = bool(os.environ.get('RENDER'))  # True on Render (HTTPS), False locally
@@ -388,6 +391,8 @@ def register_user():
         return jsonify({"status":"error","message":"Account already exists. Please log in."}), 409
 
     gate_id = get_least_busy_gate()
+    from werkzeug.security import generate_password_hash
+    pw_hash = generate_password_hash(password) if password else ''
     d1_client.execute(
         "INSERT INTO users (email,name,role,assigned_gate,phone,match_name,match_date,match_time,match_venue,match_teams) VALUES (?,?,?,?,?,?,?,?,?,?)",
         [email, name, 'user', gate_id, phone, match_name, match_date, match_time, match_venue, match_teams]
@@ -612,16 +617,6 @@ def broadcast_gates():
         total_max   += cap
     data_dict["__meta__"] = {"total": total_crowd, "max": total_max}
     socketio.emit('gate_update', data_dict)
-
-# --- GATE DEBUG (admin only) ---
-@app.route('/api/debug/gate/<int:gate_id>')
-@login_required
-def debug_gate(gate_id):
-    if current_user.role != 'admin': return jsonify({}), 403
-    all_entries = d1_client.execute("SELECT * FROM entries LIMIT 20") or []
-    all_users   = d1_client.execute("SELECT email, assigned_gate, role FROM users LIMIT 10") or []
-    gate_row    = d1_client.execute("SELECT * FROM gates") or []
-    return jsonify({'gate_id': gate_id, 'gates': gate_row, 'all_entries': all_entries, 'all_users': all_users})
 
 # --- GATE USERS API (Admin modal) ---
 @app.route('/api/gate/<int:gate_id>/users')
