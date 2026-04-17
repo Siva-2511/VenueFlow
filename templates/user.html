@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VenueFlow | IPL 2026 — Your E-Ticket</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script>tailwind={config:{}}</script>
 <script>const __origWarn = console.warn; console.warn = function(...args){ if(typeof args[0]==="string" && args[0].includes("cdn.tailwindcss"))return; __origWarn.apply(console, args); };</script>
@@ -497,17 +497,33 @@ window.addEventListener('load',()=>{
   qrCanvas.style.height = '220px';
 
   /* Entrance animations */
-  gsap.to('#ticket-card',{opacity:1,y:0,duration:1.2,ease:'expo.out',delay:.15});
-  gsap.from('#qr-stage',{scale:.4,rotation:12,opacity:0,duration:1.1,ease:'back.out(1.8)',delay:.6});
+  if (window.gsap) {
+    gsap.to('#ticket-card',{opacity:1,y:0,duration:1.2,ease:'expo.out',delay:.15});
+    gsap.from('#qr-stage',{scale:.4,rotation:12,opacity:0,duration:1.1,ease:'back.out(1.8)',delay:.6});
+  } else {
+    document.getElementById('ticket-card').style.opacity = '1';
+    document.getElementById('ticket-card').style.transform = 'none';
+  }
 
   /* AR path draw */
   const path=document.getElementById('ar-path');
-  const len=path.getTotalLength();
-  gsap.set(path,{strokeDasharray:len,strokeDashoffset:len});
-  gsap.to(path,{strokeDashoffset:0,duration:2.5,ease:'power2.inOut',delay:.5});
-  gsap.to('#ar-dest',{opacity:1,duration:.5,ease:'back.out(2)',delay:2.8});
-  gsap.to('#ar-ring',{opacity:1,duration:.4,delay:3.0});
-  gsap.to('#ar-chip',{opacity:1,duration:.4,delay:3.2});
+  if (path) {
+    if (window.gsap) {
+      const len=path.getTotalLength();
+      gsap.set(path,{strokeDasharray:len,strokeDashoffset:len});
+      gsap.to(path,{strokeDashoffset:0,duration:2.5,ease:'power2.inOut',delay:.5});
+      gsap.to('#ar-dest',{opacity:1,duration:.5,ease:'back.out(2)',delay:2.8});
+      gsap.to('#ar-ring',{opacity:1,duration:.4,delay:3.0});
+      gsap.to('#ar-chip',{opacity:1,duration:.4,delay:3.2});
+    } else {
+      path.style.strokeDasharray = 'none';
+      path.style.strokeDashoffset = '0';
+      ['#ar-dest', '#ar-ring', '#ar-chip'].forEach(id => {
+        const el = document.querySelector(id);
+        if (el) el.style.opacity = '1';
+      });
+    }
+  }
 
   /* ETA countdown (from match time to now in minutes) */
   const matchMs = new Date('{{ match_dt }}').getTime();
@@ -535,16 +551,24 @@ window.addEventListener('load',()=>{
 function switchTab(id,btn){
   document.querySelectorAll('.tab-p').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-pill').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
-  gsap.from('#tab-'+id+' > *',{y:14,opacity:0,duration:.45,stagger:.06,ease:'power3.out'});
+  const target = document.getElementById('tab-'+id);
+  if (target) target.classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (window.gsap) {
+    gsap.from('#tab-'+id+' > *',{y:14,opacity:0,duration:.45,stagger:.06,ease:'power3.out'});
+  }
 }
 
 /* ── QR tap flash ─────────────────────────────────────────── */
 function pulseQR(){
   const flash=document.getElementById('qr-flash');
-  gsap.to(flash,{opacity:1,duration:.12,onComplete:()=>gsap.to(flash,{opacity:0,duration:.5,delay:.35})});
-  gsap.fromTo('#qr-white-box',{scale:1.06},{scale:1,duration:.35,ease:'back.out(2)'});
+  if (window.gsap) {
+    gsap.to(flash,{opacity:1,duration:.12,onComplete:()=>gsap.to(flash,{opacity:0,duration:.5,delay:.35})});
+    gsap.fromTo('#qr-white-box',{scale:1.06},{scale:1,duration:.35,ease:'back.out(2)'});
+  } else {
+    flash.style.opacity = '1';
+    setTimeout(() => { flash.style.opacity = '0'; }, 300);
+  }
   if(navigator.vibrate)navigator.vibrate([80,40,80]);
   try{const ac=new(AudioContext||webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sine';o.frequency.value=880;g.gain.setValueAtTime(.04,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.15);o.start();o.stop(ac.currentTime+.15);}catch{}
 }
