@@ -5,6 +5,17 @@
 
 ---
 
+## 🌐 Live Demo
+
+### 🔗 [https://venueflow-cxn6.onrender.com](https://venueflow-cxn6.onrender.com)
+
+> **Deployed on Render.com** · Python 3 · Flask + SocketIO · Cloudflare D1 (Edge Database)
+
+> ⏳ **Note:** The app is hosted on Render's **free tier** — if it hasn't been accessed recently, it may take **30–60 seconds to wake up** (cold start). Just wait a moment and refresh.  
+> Once loaded, all features including real-time WebSocket updates, QR scanning, and live gate monitoring work normally.
+
+---
+
 ## 📝 Note for Evaluators
 
 > **This is a test simulation environment.** Use the credentials below to explore all three role-based dashboards without needing to set up accounts.
