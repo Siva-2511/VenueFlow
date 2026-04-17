@@ -131,9 +131,20 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
 
 <main class="flex-grow relative z-10 max-w-lg mx-auto px-4 pt-4 pb-8 w-full" aria-label="Main Dashboard Content">
 
+  <!-- AI Smart Pro-Tip -->
+  <div class="glass-bright rounded-2xl border border-indigo-500/20 p-4 relative overflow-hidden mb-6" style="background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(139,92,246,.08))">
+    <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full" style="background:radial-gradient(circle,rgba(139,92,246,.12),transparent 70%)"></div>
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3)">✨</div>
+      <p id="ai-pro-tip" class="text-[10px] font-medium text-gray-200 leading-relaxed italic">
+        Consulting VenueFlow AI for your best entry strategy...
+      </p>
+    </div>
+  </div>
+
   <!-- ══════════ TICKET ══════════ -->
   <section id="tab-ticket" class="tab-p active space-y-4" aria-labelledby="tab-ticket-title">
-    <div class="ticket-holo rounded-3xl overflow-hidden relative" id="ticket-card" style="opacity:0;transform:translateY(24px)" role="region" aria-label="Your E-Ticket">
+    <div class="ticket-holo rounded-3xl overflow-hidden relative" id="ticket-card" role="region" aria-label="Your E-Ticket">
       <div class="foil3 absolute inset-0 z-10 pointer-events-none"></div>
       <div class="shine-sweep z-20" style="left:-80px"></div>
       <div class="ticket-orbit1"></div>
@@ -498,11 +509,10 @@ window.addEventListener('load',()=>{
 
   /* Entrance animations */
   if (window.gsap) {
-    gsap.to('#ticket-card',{opacity:1,y:0,duration:1.2,ease:'expo.out',delay:.15});
-    gsap.from('#qr-stage',{scale:.4,rotation:12,opacity:0,duration:1.1,ease:'back.out(1.8)',delay:.6});
-  } else {
-    document.getElementById('ticket-card').style.opacity = '1';
-    document.getElementById('ticket-card').style.transform = 'none';
+    try {
+      gsap.from('#ticket-card',{opacity:0,y:24,duration:1.2,ease:'expo.out',delay:.15});
+      gsap.from('#qr-stage',{scale:.4,rotation:12,opacity:0,duration:1.1,ease:'back.out(1.8)',delay:.6});
+    } catch(e) {}
   }
 
   /* AR path draw */
@@ -552,11 +562,17 @@ function switchTab(id,btn){
   document.querySelectorAll('.tab-p').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-pill').forEach(b=>b.classList.remove('active'));
   const target = document.getElementById('tab-'+id);
-  if (target) target.classList.add('active');
-  if (btn) btn.classList.add('active');
-  if (window.gsap) {
-    gsap.from('#tab-'+id+' > *',{y:14,opacity:0,duration:.45,stagger:.06,ease:'power3.out'});
+  if (target) {
+    target.classList.add('active');
+    if (window.gsap) {
+      try {
+        gsap.from('#tab-'+id+' > *',{y:12,opacity:0,duration:.4,stagger:.05,ease:'power2.out'});
+      } catch(e) { target.style.opacity = '1'; }
+    } else {
+      target.style.opacity = '1';
+    }
   }
+  if (btn) btn.classList.add('active');
 }
 
 /* ── QR tap flash ─────────────────────────────────────────── */
@@ -640,5 +656,6 @@ function updateUserGateStatus(gateData,gateId){
   const hint=document.getElementById('gate-hint');if(hint)hint.innerText=c.hint;
 }
 </script>
+{% include 'chatbot_snippet.html' %}
 </body>
 </html>

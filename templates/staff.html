@@ -72,7 +72,11 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
   </div>
 </header>
 
-<main class="flex-grow relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 max-w-7xl mx-auto w-full" role="main">
+<main class="flex-grow p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-start"
+      data-gate-id="{{ gate.id or 0 }}"
+      data-gate-name="{{ gate.name | escape }}"
+      data-gate-current="{{ gate.current or 0 }}"
+      data-gate-capacity="{{ gate.capacity or 1 }}">
 
   <!-- LEFT: Ring + Scanner -->
   <div class="flex flex-col gap-4">
@@ -114,7 +118,7 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
               <span id="capacity-pct" class="gt-gold">{{ (gate.current / gate.capacity * 100)|int }}%</span>
             </div>
             <div class="relative h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,.04)">
-              <div id="capacity-bar" class="absolute left-0 top-0 h-full rounded-full transition-all duration-1000" style="width:{{ (gate.current / gate.capacity * 100)|int }}%;background:linear-gradient(90deg,#f59e0b,#f97316,#ef4444)"></div>
+              <div id="capacity-bar" class="absolute left-0 top-0 h-full rounded-full transition-all duration-1000" style="background:linear-gradient(90deg,#f59e0b,#f97316,#ef4444)"></div>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-2">
@@ -127,12 +131,25 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
               <p class="text-[8px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">My Scans</p>
             </div>
           </div>
-        </div>
-      </div>
     </div>
+  </div>
+
+  <!-- AI Sector Advisory — Repositioned for visibility -->
+  <div class="glass rounded-2xl border border-indigo-500/30 p-5 relative overflow-hidden mb-4 shrink-0" style="background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(34,197,94,.05))">
+    <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full" style="background:radial-gradient(circle,rgba(34,197,94,.15),transparent 70%)"></div>
+    <h3 class="font-orb text-[9px] font-black uppercase text-indigo-400 mb-2 flex items-center gap-1.5">
+      <span class="animate-pulse">✨</span> GEMINI OPERATOR ADVISORY
+    </h3>
+    <div class="relative">
+      <p id="ai-pro-tip" class="text-[10px] font-mono text-gray-200 leading-relaxed italic">
+        Gathering shift data and load metrics for real-time advisory...
+      </p>
+    </div>
+  </div>
+</div>
 
     <!-- QR Scanner: Sci-fi frame -->
-    <div class="scanner-frame flex-grow glass rounded-2xl border border-green-500/15 relative" style="min-height:300px;opacity:0;transform:translateY(30px)">
+    <div class="scanner-frame flex-grow glass rounded-2xl border border-green-500/15 relative" style="min-height:300px">
       <!-- Gradient bar -->
       <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl z-30" style="background:linear-gradient(90deg,#22c55e,#06b6d4,#22c55e)"></div>
 
@@ -186,19 +203,19 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
 
     <!-- Session Stats Bar -->
     <div class="grid grid-cols-4 gap-2 mb-4">
-      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d" style="opacity:0;transform:translateY(16px)">
+      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
         <p class="font-orb text-xl font-black" style="color:#22c55e" id="s-ok">0</p>
         <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Granted</p>
       </div>
-      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d" style="opacity:0;transform:translateY(16px)">
+      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
         <p class="font-orb text-xl font-black" style="color:#ef4444" id="s-fail">0</p>
         <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Denied</p>
       </div>
-      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d" style="opacity:0;transform:translateY(16px)">
+      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
         <p class="font-orb text-xl font-black" style="color:#f59e0b" id="s-pend">0</p>
         <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Pending</p>
       </div>
-      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d" style="opacity:0;transform:translateY(16px)">
+      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
         <p class="font-orb text-lg font-black text-white" id="s-shift">00:00</p>
         <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Shift</p>
       </div>
@@ -215,22 +232,22 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
 
     <!-- Mini stats -->
     <div class="grid grid-cols-3 gap-3">
-      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d" style="opacity:0;transform:translateY(20px)">
+      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
         <p class="text-2xl font-black font-orb text-white" id="s1">0</p>
         <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Scanned</p>
       </div>
-      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d" style="opacity:0;transform:translateY(20px)">
+      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
         <p class="text-2xl font-black font-orb" style="color:#22c55e" id="s2">{{ gate.capacity - gate.current }}</p>
         <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Available</p>
       </div>
-      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d" style="opacity:0;transform:translateY(20px)">
+      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
         <p class="text-lg font-black font-orb uppercase" id="gate-status-sm" style="color:#22c55e">{{ (gate.status or 'Open')|capitalize }}</p>
         <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Status</p>
       </div>
     </div>
 
     <!-- Matrix-style Entry Stream -->
-    <div class="reg-card flex-grow glass rounded-2xl border border-indigo-500/15 flex flex-col" style="max-height:55vh;opacity:0;transform:translateY(30px);position:relative">
+    <div class="reg-card flex-grow glass rounded-2xl border border-indigo-500/15 flex flex-col" style="max-height:55vh;position:relative">
       <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899)"></div>
       <div class="flex items-center justify-between p-5 pb-3 shrink-0">
         <h3 class="font-orb text-xs font-black tracking-wider gt-purple">📋 ENTRY DATA STREAM</h3>
@@ -272,11 +289,15 @@ let grantedCount=0,deniedCount=0,pendingCount=0;
 const shiftStart=Date.now();
 
 document.addEventListener('DOMContentLoaded',()=>{
-  gsap.to('.cap-card', {opacity:1,y:0,duration:1,ease:'expo.out',delay:.1});
-  gsap.to('.scanner-frame',{opacity:1,y:0,duration:1,ease:'expo.out',delay:.2});
-  gsap.to('.stat-s',{opacity:1,y:0,duration:.7,ease:'back.out(1.4)',stagger:.05,delay:.22});
-  gsap.to('.stat-c',{opacity:1,y:0,duration:.7,ease:'back.out(1.4)',stagger:.07,delay:.35});
-  gsap.to('.reg-card',{opacity:1,y:0,duration:1,ease:'expo.out',delay:.4});
+  if (window.gsap) {
+    try {
+      gsap.from('.cap-card', {opacity:0,y:24,duration:1,ease:'expo.out',delay:.1});
+      gsap.from('.scanner-frame',{opacity:0,y:30,duration:1,ease:'expo.out',delay:.2});
+      gsap.from('.stat-s',{opacity:0,y:16,duration:.7,ease:'back.out(1.4)',stagger:.05,delay:.22});
+      gsap.from('.stat-c',{opacity:0,y:20,duration:.7,ease:'back.out(1.4)',stagger:.07,delay:.35});
+      gsap.from('.reg-card',{opacity:0,y:30,duration:1,ease:'expo.out',delay:.4});
+    } catch(e) {}
+  }
 
   // Shift timer (counts up)
   setInterval(()=>{
@@ -289,7 +310,18 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Session heartbeat — keeps login cookie alive during long shifts
   setInterval(()=>fetch('/api/heartbeat',{credentials:'same-origin'}),4*60*1000);
 
-  initWebSockets('staff','{{ gate.name }}',{{ gate.id }});
+  // Initial UI state
+  const mainEl = document.querySelector('main');
+  const gateId = mainEl.dataset.gateId;
+  const gateName = mainEl.dataset.gateName;
+  const gateCurrent = parseInt(mainEl.dataset.gateCurrent);
+  const gateCapacity = parseInt(mainEl.dataset.gateCapacity);
+
+  const initFill = Math.min(100, Math.floor((gateCurrent / (gateCapacity || 1)) * 100));
+  const bar = document.getElementById('capacity-bar');
+  if(bar) bar.style.width = initFill + '%';
+
+  initWebSockets('staff', gateName, gateId);
 });
 
 /* ── Pending Arrivals (user_registered WS event) ───────────── */
@@ -480,5 +512,6 @@ function updateGateStatusBadge(status){
   if(status==='full'){playBeep(220,.6,'sawtooth');gsap.fromTo('main',{},{filter:'saturate(1)'},);}
 }
 </script>
+{% include 'chatbot_snippet.html' %}
 </body>
 </html>

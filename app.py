@@ -10,6 +10,7 @@ from flask_socketio import SocketIO, emit, join_room
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import check_password_hash
 import d1_client
+import gemini_agent
 
 # ── Load .env if present (never commits secrets to source) ────────────
 try:
@@ -723,9 +724,51 @@ def get_ai_insight():
         '''SELECT assigned_gate as gate_id, COUNT(id) as count
            FROM users WHERE assigned_gate IS NOT NULL GROUP BY assigned_gate'''
     )
-    from gemini_agent import analyze_crowd_data
-    insight = analyze_crowd_data(str(stats))
+    insight = gemini_agent.analyze_crowd_data(str(stats))
     return jsonify({'insight': insight, 'status': 'success'})
+
+@app.route('/api/ai_assist')
+def get_ai_assist():
+    """Contextual page assistant logic."""
+    role = current_user.role if current_user.is_authenticated else 'guest'
+    page = request.args.get('page', 'landing')
+    
+    # Build context based on role/page
+    context = {}
+    if role in ['admin', 'staff']:
+        context['gates'] = d1_client.execute("SELECT * FROM gates")
+    elif role == 'user':
+        gid = getattr(current_user, 'gate_id', None)
+        if gid:
+            context['your_gate'] = d1_client.execute("SELECT * FROM gates WHERE id=?", [gid])
+    
+    # Use a specialized prompt for 'Advisory' vs 'Chat'
+    prompt = f"Provide a brief, 1-sentence helpful 'Smart Pro-Tip' for a {role} on the {page} page of a stadium app."
+    response = gemini_agent.get_chat_response(prompt, role, str(context))
+    return jsonify({'tip': response, 'status': 'success'})
+
+@app.route('/api/ai_chat', methods=['POST'])
+def ai_chat():
+    """Omnipresent chatbot endpoint."""
+    data = request.json or {}
+    msg = data.get('message', '')
+    if not msg:
+        return jsonify({'status': 'error', 'message': 'Empty message'}), 400
+        
+    role = current_user.role if current_user.is_authenticated else 'guest'
+    context = {
+        'current_time': time.strftime('%Y-%m-%d %H:%M:%S'),
+        'location': 'Narendra Modi Stadium, Ahmedabad'
+    }
+    
+    # Add venue context if applicable
+    if role != 'guest':
+        context['user_name'] = current_user.name
+        if role in ['staff', 'user']:
+            context['assigned_gate'] = d1_client.execute("SELECT * FROM gates WHERE id=?", [current_user.gate_id])
+    
+    response = gemini_agent.get_chat_response(msg, role, str(context))
+    return jsonify({'response': response, 'status': 'success'})
 
 
 if __name__ == '__main__':

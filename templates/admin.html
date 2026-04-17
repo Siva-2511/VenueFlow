@@ -90,7 +90,7 @@ body{background:#020010;overflow-x:hidden}
   <!-- KPI Row -->
   <section class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3" aria-label="Key Performance Indicators">
     {% for kpi in [('Total Crowd','kpi-total','0','/ 2400 seats','rgba(59,130,246,.4)','gt-blue'),('Gates Active','kpi-open','12','of 12 gates','rgba(34,197,94,.4)','text-green-400'),('Avg Wait','kpi-wait','3m','estimated','rgba(245,158,11,.4)','gt-gold'),('Saturation','kpi-pct','0%','venue fill','rgba(139,92,246,.4)','gt-purple'),('New Today','kpi-new','0','registrations','rgba(6,182,212,.4)','gt-cyber')] %}
-    <article class="kpi-card glass rounded-2xl p-5 border border-white/5 card-3d relative overflow-hidden" style="opacity:0;transform:translateY(24px)" aria-label="{{ kpi[0] }} metric">
+    <article class="kpi-card glass rounded-2xl p-5 border border-white/5 card-3d relative overflow-hidden" aria-label="{{ kpi[0] }} metric">
       <div class="absolute -right-3 -top-3 w-14 h-14 rounded-full kpi-orb" data-glow="{{ kpi[4] }}" aria-hidden="true"></div>
       <p class="text-[9px] uppercase font-bold tracking-widest mb-1" style="color:rgba(255,255,255,.5)">{{ kpi[0] }}</p>
       <p class="text-3xl font-black font-orb kpi-num {{ kpi[5] }}" id="{{ kpi[1] }}">{{ kpi[2] }}</p>
@@ -109,7 +109,7 @@ body{background:#020010;overflow-x:hidden}
   <!-- Three.js Stadium + Master Bar -->
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
     <!-- 3D Stadium -->
-    <div class="xl:col-span-2 glass rounded-2xl border border-indigo-500/20 p-4 relative overflow-hidden" style="opacity:0;transform:translateY(24px)">
+    <div class="xl:col-span-2 glass rounded-2xl border border-indigo-500/20 p-4 relative overflow-hidden">
       <div class="hz-bar rounded-full mb-3" style="height:2px"></div>
       <div class="flex justify-between items-center mb-3">
         <h2 class="font-orb text-sm font-black tracking-wider gt-cyber">⬡ 3D STADIUM — LIVE LOAD GRID</h2>
@@ -175,7 +175,7 @@ body{background:#020010;overflow-x:hidden}
     </div>
 
   <!-- Gate Grid -->
-  <div class="glass rounded-2xl border border-indigo-500/15 p-5" style="opacity:0;transform:translateY(24px)">
+  <div class="glass rounded-2xl border border-indigo-500/15 p-5">
     <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
       <h2 class="font-orb text-sm font-black tracking-wider gt-blue">⚡ GATE CONTROL MATRIX</h2>
       <div class="flex gap-3 text-[8px] font-bold uppercase tracking-wider" style="color:rgba(255,255,255,.45)">
@@ -193,7 +193,7 @@ body{background:#020010;overflow-x:hidden}
   </div>
 
   <!-- Chart -->
-  <div class="glass rounded-2xl border border-indigo-500/15 p-5" style="opacity:0;transform:translateY(24px)">
+  <div class="glass rounded-2xl border border-indigo-500/15 p-5">
     <div class="flex justify-between items-center mb-4">
       <h2 class="font-orb text-xs font-black tracking-wider gt-cyan">📈 ENTRY FLOW ANALYSIS</h2>
       <span id="flow-total" class="text-[9px] font-bold font-mono" style="color:#06b6d4">0 total entries</span>
@@ -408,9 +408,15 @@ function clearLogs(){gsap.to('#alerts-container > div',{opacity:0,x:-10,stagger:
 /* ── Init ────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded',()=>{
   if (window.gsap) {
-    gsap.to('.kpi-card',{opacity:1,y:0,scale:1,duration:.8,stagger:.08,ease:'back.out(1.2)',delay:.1});
-    gsap.to('main > .grid:nth-child(2)',{opacity:1,y:0,duration:.9,ease:'power3.out',delay:.3});
-    gsap.to('.glass.rounded-2xl',{opacity:1,y:0,duration:.9,stagger:.1,ease:'power3.out',delay:.4});
+    try {
+      gsap.to('.kpi-card',{opacity:1,y:0,scale:1,duration:.8,stagger:.08,ease:'back.out(1.2)',delay:.1});
+      gsap.to('.glass.rounded-2xl',{opacity:1,y:0,duration:.9,stagger:.1,ease:'power3.out',delay:.4});
+    } catch(e) {
+      document.querySelectorAll('.kpi-card, .glass.rounded-2xl').forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'none';
+      });
+    }
   } else {
     document.querySelectorAll('.kpi-card, .glass.rounded-2xl').forEach(el => {
       el.style.opacity = '1';
@@ -471,5 +477,6 @@ setTimeout(fetchAIInsights, 2000);
 setInterval(fetchAIInsights, 30000);
 
 </script>
+{% include 'chatbot_snippet.html' %}
 </body>
 </html>
