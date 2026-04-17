@@ -31,7 +31,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY']                = os.environ.get('SECRET_KEY', 'venueflow-ultra-secret-2026-!@#$%')
 app.config['SESSION_COOKIE_HTTPONLY']   = True
 app.config['SESSION_COOKIE_SAMESITE']  = 'Lax'
-app.config['SESSION_COOKIE_SECURE']    = False          # False for HTTP (localhost). Set True on HTTPS.
+app.config['SESSION_COOKIE_SECURE']    = bool(os.environ.get('RENDER'))  # True on Render (HTTPS), False locally
 app.config['SESSION_COOKIE_NAME']       = 'vf_session'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
 app.config['SESSION_PERMANENT']         = True
