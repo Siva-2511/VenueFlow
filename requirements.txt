@@ -11,4 +11,4 @@ google-auth-oauthlib>=1.1.0
 python-dotenv>=1.0.0
 pytest
 pytest-flask
-google-genai
+google-genai>=0.4.0

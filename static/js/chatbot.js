@@ -6,6 +6,7 @@ class VenueFlowChat {
     constructor() {
         this.isOpen = false;
         this.messages = [];
+        this.msgHistory = []; // Track timestamps for rate limiting
         this.init();
     }
 
@@ -75,6 +76,15 @@ class VenueFlowChat {
     async send() {
         const msg = this.input.value.trim();
         if (!msg) return;
+
+        // Rate Limiting: Max 10 messages per minute
+        const now = Date.now();
+        this.msgHistory = this.msgHistory.filter(t => now - t < 60000);
+        if (this.msgHistory.length >= 10) {
+            this.addMessage('bot', "System standard: Please wait a moment (Quota protection active) 🛡️");
+            return;
+        }
+        this.msgHistory.push(now);
 
         this.input.value = '';
         this.addMessage('user', msg);

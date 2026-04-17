@@ -17,14 +17,16 @@ def analyze_crowd_data(gate_data):
             f"to handle the crowd distribution safely and efficiently."
         )
         response = client.models.generate_content(
-            model='gemini-2.0-flash', # Use flash for speed
+            model='gemini-2.5-flash-lite', # Updated to 2026 high-quota model
             contents=prompt,
         )
         return response.text
     except Exception as e:
         error_str = str(e)
         if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
-            return "VenueFlow AI insight is temporarily unavailable due to high demand. Please try again in 30 seconds! 🏏"
+            return "VenueFlow AI insight is temporarily unavailable due to high demand. (Gemini 2.5 protective cooling) 🏏"
+        if "404" in error_str or "Model not found" in error_str:
+            return "AI Insight Warning: gemini-2.5-flash-lite not enabled in API project permissions."
         return f"AI Insight Unavailable: {error_str}"
 
 def get_chat_response(message, role, context_data):
@@ -57,7 +59,7 @@ def get_chat_response(message, role, context_data):
 
         try:
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model='gemini-2.5-flash-lite',
                 config={'system_instruction': system_instruction},
                 contents=full_prompt,
             )

@@ -72,7 +72,7 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
   </div>
 </header>
 
-<main class="flex-grow p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-start"
+<main class="flex-grow p-4 md:p-5 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
       data-gate-id="{{ gate.id or 0 }}"
       data-gate-name="{{ gate.name | escape }}"
       data-gate-current="{{ gate.current or 0 }}"
@@ -194,7 +194,7 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
   <div class="flex flex-col gap-4">
 
     <!-- Session Stats Bar -->
-    <div class="grid grid-cols-4 gap-2 mb-4">
+    <div class="grid grid-cols-4 gap-2 mb-3">
       <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
         <p class="font-orb text-xl font-black" style="color:#22c55e" id="s-ok">0</p>
         <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Granted</p>
