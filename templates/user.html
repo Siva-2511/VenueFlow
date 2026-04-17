@@ -411,8 +411,13 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
       <h3 class="font-orb text-xs font-black tracking-wider gt-green mb-4">📋 ENTRY PROTOCOL</h3>
       <div class="space-y-2">
         {% for rule in [('✓','Photo ID + E-Ticket required at entry','ok'),('✓','Gates open 3 hrs before match','ok'),('✗','No outside food or detachable lens camera','fail'),('✗','No re-entry after check-in','fail')] %}
-        <div class="flex gap-3 items-start p-3 rounded-xl border" style="background:{{ 'rgba(34,197,94,.05)' if rule[2]=='ok' else 'rgba(239,68,68,.05)' }};border-color:{{ 'rgba(34,197,94,.15)' if rule[2]=='ok' else 'rgba(239,68,68,.12)' }}">
-          <span class="font-black shrink-0 font-orb text-sm" style="color:{{ '#22c55e' if rule[2]=='ok' else '#ef4444' }}">{{ rule[0] }}</span>
+        {% if rule[2] == 'ok' %}
+        <div class="flex gap-3 items-start p-3 rounded-xl border" style="background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.15)">
+          <span class="font-black shrink-0 font-orb text-sm" style="color:#22c55e">{{ rule[0] }}</span>
+        {% else %}
+        <div class="flex gap-3 items-start p-3 rounded-xl border" style="background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.12)">
+          <span class="font-black shrink-0 font-orb text-sm" style="color:#ef4444">{{ rule[0] }}</span>
+        {% endif %}
           <p class="text-sm" style="color:#d1d5db">{{ rule[1] }}</p>
         </div>
         {% endfor %}
@@ -522,7 +527,7 @@ window.addEventListener('load',()=>{
     document.getElementById('hype-bar-el').style.width=`${hype}%`;
   },3000);
 
-  initWebSockets('user',null,{{ gate_id }});
+  initWebSockets('user',null,"{{ gate_id }}");
 });
 
 /* ── Tabs ─────────────────────────────────────────────────── */
