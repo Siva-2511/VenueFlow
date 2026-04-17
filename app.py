@@ -374,10 +374,10 @@ def heartbeat():
 @app.route('/register', methods=['POST'])
 @rate_limit(5, 60)
 def register_user():
-    """New user registration with IPL match preference."""
     data = request.get_json(silent=True) or {}
     email      = sanitize(data.get('email', '')).lower()
     password   = sanitize(data.get('password', ''), 128)
+    password_confirm = sanitize(data.get('passwordConfirm', ''), 128)
     name       = sanitize(data.get('name', ''), 60)
     phone      = sanitize(data.get('phone', ''), 20)
     match_name = sanitize(data.get('match_name', 'IPL 2026'), 120)
@@ -390,12 +390,14 @@ def register_user():
         return jsonify({"status":"error","message":"Invalid email format."}), 400
     if len(password) < 4:
         return jsonify({"status":"error","message":"Password must be at least 4 characters."}), 400
+    if password != password_confirm:
+        return jsonify({"status":"error","message":"Passwords do not match."}), 400
     if not name:
         name = email.split('@')[0].replace('.', ' ').title()
 
     existing = d1_client.execute("SELECT email FROM users WHERE email=?", [email])
     if existing:
-        return jsonify({"status":"error","message":"Account already exists. Please log in."}), 409
+        return jsonify({"status":"error","message":"Account already exists."}), 409
 
     gate_id = get_least_busy_gate()
     from werkzeug.security import generate_password_hash

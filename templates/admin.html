@@ -67,37 +67,37 @@ body{background:#020010;overflow-x:hidden}
 </div>
 
 <!-- NAV -->
-<nav class="sticky top-0 z-50 glass-bright border-b border-indigo-500/20 px-5 py-3 flex items-center justify-between">
-  <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg glow-b shrink-0" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">👑</div>
+<header class="sticky top-0 z-50 glass-bright border-b border-indigo-500/20 px-5 py-3 flex items-center justify-between" role="banner">
+  <nav class="flex items-center gap-3" aria-label="Admin Brand">
+    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg glow-b shrink-0" style="background:linear-gradient(135deg,#3b82f6,#6366f1)" aria-hidden="true">👑</div>
     <div>
       <p class="font-orb text-sm font-black gt-blue tracking-wider">ADMIN COMMAND GRID</p>
       <p class="text-[9px] font-mono" style="color:rgba(99,102,241,.6)">{{ email }} · Sector Omega</p>
     </div>
-  </div>
+  </nav>
   <div class="flex items-center gap-2">
-    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3)">
-      <span class="w-1.5 h-1.5 rounded-full pulse" style="background:#22c55e"></span>
+    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3)" role="status" aria-label="System Status">
+      <span class="w-1.5 h-1.5 rounded-full pulse" style="background:#22c55e" aria-hidden="true"></span>
       <span style="color:#22c55e">All Systems Live</span>
     </div>
-    <button onclick="openBc()" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border transition-all hover:scale-105" style="color:#f59e0b;background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3)">📢 Broadcast</button>
-    <a href="/logout" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border" style="color:#ef4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)">Logout</a>
+    <button onclick="openBc()" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border transition-all hover:scale-105" style="color:#f59e0b;background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3)" aria-label="Open emergency broadcast">📢 Broadcast</button>
+    <a href="/logout" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border" style="color:#ef4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)" aria-label="Sign out">Logout</a>
   </div>
-</nav>
+</header>
 
 <main class="flex-grow relative z-10 p-4 max-w-[110rem] mx-auto w-full space-y-4">
 
   <!-- KPI Row -->
-  <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3">
+  <section class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3" aria-label="Key Performance Indicators">
     {% for kpi in [('Total Crowd','kpi-total','0','/ 2400 seats','rgba(59,130,246,.4)','gt-blue'),('Gates Active','kpi-open','12','of 12 gates','rgba(34,197,94,.4)','text-green-400'),('Avg Wait','kpi-wait','3m','estimated','rgba(245,158,11,.4)','gt-gold'),('Saturation','kpi-pct','0%','venue fill','rgba(139,92,246,.4)','gt-purple'),('New Today','kpi-new','0','registrations','rgba(6,182,212,.4)','gt-cyber')] %}
-    <div class="kpi-card glass rounded-2xl p-5 border border-white/5 card-3d relative overflow-hidden" style="opacity:0;transform:translateY(24px)">
-      <div class="absolute -right-3 -top-3 w-14 h-14 rounded-full kpi-orb" data-glow="{{ kpi[4] }}"></div>
+    <article class="kpi-card glass rounded-2xl p-5 border border-white/5 card-3d relative overflow-hidden" style="opacity:0;transform:translateY(24px)" aria-label="{{ kpi[0] }} metric">
+      <div class="absolute -right-3 -top-3 w-14 h-14 rounded-full kpi-orb" data-glow="{{ kpi[4] }}" aria-hidden="true"></div>
       <p class="text-[9px] uppercase font-bold tracking-widest mb-1" style="color:rgba(255,255,255,.5)">{{ kpi[0] }}</p>
       <p class="text-3xl font-black font-orb kpi-num {{ kpi[5] }}" id="{{ kpi[1] }}">{{ kpi[2] }}</p>
       <p class="text-[9px] mt-1 font-mono" style="color:rgba(255,255,255,.4)">{{ kpi[3] }}</p>
-    </div>
+    </article>
     {% endfor %}
-  </div>
+  </section>
   <script>
     /* Apply KPI orb glow from data-glow attribute (avoids Jinja2 inside style= lint errors) */
     document.querySelectorAll('.kpi-orb').forEach(el=>{

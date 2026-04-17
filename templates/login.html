@@ -121,26 +121,27 @@ select.field-input option{background:#0a0628;color:#fff}
   <div class="card-body">
 
     <!-- Logo -->
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px" id="logo-row">
-      <div class="logo-mark">🏟</div>
+    <header style="display:flex;align-items:center;gap:14px;margin-bottom:4px" id="logo-row" role="banner">
+      <div class="logo-mark" aria-hidden="true">🏟</div>
       <div>
-        <div class="logo-name">VENUEFLOW</div>
+        <h1 class="logo-name">VENUEFLOW</h1>
         <div class="logo-tag">IPL 2026 · AI Venue Management</div>
       </div>
-    </div>
+    </header>
 
     <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab-btn active" id="tab-login-btn" onclick="switchTab('login')">🔐 Login</button>
-      <button class="tab-btn" id="tab-register-btn" onclick="switchTab('register')">🎟 Register</button>
-    </div>
+    <nav class="tabs" role="tablist" aria-label="Authentication selection">
+      <button class="tab-btn active" id="tab-login-btn" onclick="switchTab('login')" role="tab" aria-selected="true" aria-controls="panel-login">🔐 Login</button>
+      <button class="tab-btn" id="tab-register-btn" onclick="switchTab('register')" role="tab" aria-selected="false" aria-controls="panel-register">🎟 Register</button>
+    </nav>
 
-    <!-- ═══════ LOGIN ═══════ -->
-    <div id="panel-login">
+    <!-- ═══════ LOGIN/REGISTER MAIN ═══════ -->
+    <main id="auth-main" role="main">
+      <div id="panel-login" role="tabpanel" aria-labelledby="tab-login-btn">
       <p style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:18px;font-family:'JetBrains Mono',monospace">Sign in with your registered credentials.</p>
 
       <!-- Google Sign-In — server-side OAuth2 redirect -->
-      <a href="/auth/google/start" id="google-btn"
+      <a href="/auth/google/start" id="google-btn" aria-label="Sign in with Google"
          style="display:flex;align-items:center;justify-content:center;gap:10px;
                 width:100%;padding:13px 16px;border-radius:12px;
                 background:rgba(255,255,255,.07);
@@ -182,8 +183,8 @@ select.field-input option{background:#0a0628;color:#fff}
       </p>
     </div>
 
-    <!-- ═══════ REGISTER ═══════ -->
-    <div id="panel-register" style="display:none">
+      <!-- ═══════ REGISTER ═══════ -->
+      <div id="panel-register" style="display:none" role="tabpanel" aria-labelledby="tab-register-btn" aria-hidden="true">
       <p style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:18px;font-family:'JetBrains Mono',monospace">Create your IPL 2026 attendee account.</p>
       <form onsubmit="doRegister();return false;" autocomplete="on" novalidate>
         <div class="field-grid">
@@ -227,7 +228,7 @@ select.field-input option{background:#0a0628;color:#fff}
         Have an account? <span class="link-text" onclick="switchTab('login')">Sign in →</span>
       </p>
     </div>
-
+    </main>
   </div>
 </div>
 

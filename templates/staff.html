@@ -55,7 +55,7 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
 </div>
 
 <!-- NAV -->
-<nav class="sticky top-0 z-50 glass-bright border-b border-yellow-500/20 px-5 py-3 flex items-center justify-between">
+<header class="sticky top-0 z-50 glass-bright border-b border-yellow-500/20 px-5 py-3 flex items-center justify-between" role="banner">
   <div class="flex items-center gap-3">
     <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0" style="background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 0 25px rgba(245,158,11,.4)">🧑</div>
     <div>
@@ -64,15 +64,15 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
     </div>
   </div>
   <div class="flex items-center gap-2">
-    <div id="gate-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest status-open transition-all duration-500">
-      <span id="gate-status-dot" class="w-1.5 h-1.5 rounded-full pulse" style="background:#22c55e"></span>
+    <div id="gate-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest status-open transition-all duration-500" role="status">
+      <span id="gate-status-dot" class="w-1.5 h-1.5 rounded-full pulse" style="background:#22c55e" aria-hidden="true"></span>
       <span id="gate-status-text" style="color:#22c55e">Open</span>
     </div>
-    <a href="/logout" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border" style="color:#ef4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)">Logout</a>
+    <a href="/logout" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border" style="color:#ef4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)" aria-label="Sign out">Logout</a>
   </div>
-</nav>
+</header>
 
-<main class="flex-grow relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 max-w-7xl mx-auto w-full">
+<main class="flex-grow relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 max-w-7xl mx-auto w-full" role="main">
 
   <!-- LEFT: Ring + Scanner -->
   <div class="flex flex-col gap-4">

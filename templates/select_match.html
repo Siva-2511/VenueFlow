@@ -36,36 +36,36 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%);min-
   <div class="orb-ambient" style="width:400px;height:400px;bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(6,182,212,.09),transparent 65%)"></div>
 </div>
 
-<div class="card relative z-10" id="card" style="opacity:0;transform:translateY(30px)">
+<main class="card relative z-10" id="card" style="opacity:0;transform:translateY(30px)" role="main">
   <div class="hz-bar"></div>
 
   <!-- Header -->
-  <div class="flex items-center gap-4 mb-6">
-    <div class="avatar">🏏</div>
+  <header class="flex items-center gap-4 mb-6" role="banner">
+    <div class="avatar" aria-hidden="true">🏏</div>
     <div>
       <p class="font-orb text-[9px] font-black tracking-widest" style="color:rgba(255,255,255,.4)">WELCOME TO VENUEFLOW</p>
       <h1 class="font-orb text-xl font-black mt-0.5" style="color:#fff">Select Your Match</h1>
       <p class="text-[11px] mt-1 font-mono" style="color:rgba(255,255,255,.45)">Signed in as <span style="color:#818cf8">{{ email }}</span></p>
     </div>
-  </div>
+  </header>
 
   <p class="text-[12px] font-mono mb-4" style="color:rgba(255,255,255,.5)">Choose the IPL 2026 match you'll be attending. Your gate assignment will be generated automatically.</p>
 
   <!-- Error msg -->
-  <div id="err-msg" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:11px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#fca5a5;margin-bottom:14px"></div>
+  <div id="err-msg" style="display:none;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:11px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#fca5a5;margin-bottom:14px" aria-live="assertive"></div>
 
   <!-- Match list -->
-  <div class="scroll-list" id="match-list">
+  <section class="scroll-list" id="match-list" role="listbox" aria-label="Available IPL matches">
     <!-- Populated by JS -->
-  </div>
+  </section>
 
   <!-- Confirm button -->
-  <button class="btn-main" id="confirm-btn" disabled onclick="confirmMatch()">
+  <button class="btn-main" id="confirm-btn" disabled onclick="confirmMatch()" aria-label="Confirm selection and generate ticket">
     🎟 CONFIRM &amp; GET MY TICKET
   </button>
 
   <p class="text-center text-[9px] font-mono mt-4" style="color:rgba(255,255,255,.25)">🔒 Secured by VenueFlow AI · IPL 2026</p>
-</div>
+</main>
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
