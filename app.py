@@ -313,19 +313,26 @@ def google_auth():
 
 @app.route('/select-match')
 def select_match_page():
-    """Match selection page for first-time Google users."""
+    """Match selection page for first-time Google users or re-registering users."""
     email = session.get('pending_google_email')
     if not email:
-        return redirect(url_for('login'))
+        if current_user.is_authenticated and current_user.role == 'user':
+            email = current_user.email
+        else:
+            return redirect(url_for('login'))
     return render_template('select_match.html', email=email)
 
 @app.route('/select_match', methods=['POST'])
 def select_match_submit():
-    """Save match choice for a first-time Google user and log them in."""
+    """Save match choice for a user and log them in."""
     email = session.get('pending_google_email')
     name  = session.get('pending_google_name', '')
     if not email:
-        return jsonify({'status':'error','message':'Session expired. Please sign in again.'}), 401
+        if current_user.is_authenticated and current_user.role == 'user':
+            email = current_user.email
+            name  = current_user.name
+        else:
+            return jsonify({'status':'error','message':'Session expired. Please sign in again.'}), 401
     data = request.get_json(silent=True) or {}
     match_name  = sanitize(data.get('match_name',  'IPL 2026'), 120)
     match_teams = sanitize(data.get('match_teams', ''), 80)
