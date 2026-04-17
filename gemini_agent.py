@@ -57,10 +57,21 @@ def get_chat_response(message, role, context_data):
             "Response (concise, professional, and emoji-friendly):"
         )
 
+        # Safety settings to align with Google Responsible AI policies
+        safety_settings = [
+            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+        ]
+
         try:
             response = client.models.generate_content(
                 model='gemini-2.5-flash-lite',
-                config={'system_instruction': system_instruction},
+                config={
+                    'system_instruction': system_instruction,
+                    'safety_settings': safety_settings
+                },
                 contents=full_prompt,
             )
             return response.text

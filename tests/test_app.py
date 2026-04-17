@@ -2,13 +2,6 @@ import os
 import pytest
 from app import app, sanitize, get_least_busy_gate
 
-@pytest.fixture
-def client():
-    app.config['TESTING'] = True
-    app.config['WTF_CSRF_ENABLED'] = False
-    with app.test_client() as client:
-        yield client
-
 def test_root_redirect(client):
     """Test that the root URL redirects to login."""
     response = client.get('/')
@@ -71,3 +64,20 @@ def test_duplicate_registration_fails(client):
     })
     assert response.status_code == 409
     assert b'Account already exists' in response.data
+
+def test_api_stats_access(client):
+    """Test that stats API returns 401 when unauthenticated (as expected)."""
+    response = client.get('/api/stats')
+    # Since we added protection, 401 is now the correct response for guests
+    assert response.status_code == 401
+
+def test_gate_logic(mocker):
+    """Test logic for finding the least busy gate by mocking D1 results."""
+    # The real function uses ORDER BY current ASC LIMIT 1
+    # So we mock it to return the 'best' gate as the first element
+    mock_gates = [{"id": 3, "current": 5}]
+    mocker.patch('d1_client.execute', return_value=mock_gates)
+    
+    # get_least_busy_gate() takes 0 args in app.py
+    from app import get_least_busy_gate
+    assert get_least_busy_gate() == 3

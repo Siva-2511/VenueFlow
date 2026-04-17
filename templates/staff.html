@@ -239,15 +239,15 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
     </div>
 
     <!-- Matrix-style Entry Stream -->
-    <div class="reg-card flex-grow glass rounded-2xl border border-indigo-500/15 flex flex-col" style="max-height:55vh;position:relative">
+    <div class="reg-card flex-grow glass rounded-2xl border border-indigo-500/15 flex flex-col" style="max-height:55vh;position:relative" role="region" aria-label="Live Entry Stream">
       <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899)"></div>
       <div class="flex items-center justify-between p-5 pb-3 shrink-0">
         <h3 class="font-orb text-xs font-black tracking-wider gt-purple">📋 ENTRY DATA STREAM</h3>
-        <span class="text-[8px] font-bold uppercase font-mono px-2 py-1 rounded-full border" style="color:#8b5cf6;background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.25)" id="scan-count-badge">0 RECORDS</span>
+        <span class="text-[8px] font-bold uppercase font-mono px-2 py-1 rounded-full border" style="color:#8b5cf6;background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.25)" id="scan-count-badge" role="status">0 RECORDS</span>
       </div>
-      <div class="flex-grow overflow-y-auto px-4 pb-4 space-y-1.5 pr-3" id="entry-list">
+      <div class="flex-grow overflow-y-auto px-4 pb-4 space-y-1.5 pr-3" id="entry-list" role="log" aria-live="polite">
         <div class="text-center py-10" id="empty-state">
-          <div class="text-3xl mb-2">📟</div>
+          <div class="text-3xl mb-2" aria-hidden="true">📟</div>
           <p class="text-[9px] uppercase font-bold tracking-widest font-mono" style="color:rgba(255,255,255,.3)">AWAITING SCAN DATA...</p>
         </div>
       </div>

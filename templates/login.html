@@ -169,16 +169,16 @@ select.field-input option{background:#0a0628;color:#fff}
 
       <form onsubmit="doLogin();return false;" autocomplete="on" novalidate>
         <div class="field">
-          <label class="field-label" for="login-email">Email Address</label>
-          <input class="field-input" type="email" id="login-email" name="email" placeholder="your@email.com" autocomplete="username email" required>
+          <label class="field-label" for="login-email">Email Address <span aria-hidden="true" class="req">*</span></label>
+          <input class="field-input" type="email" id="login-email" name="email" placeholder="your@email.com" autocomplete="username email" required aria-required="true">
         </div>
         <div class="field">
-          <label class="field-label" for="login-pass">Password</label>
-          <input class="field-input" type="password" id="login-pass" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+          <label class="field-label" for="login-pass">Password <span aria-hidden="true" class="req">*</span></label>
+          <input class="field-input" type="password" id="login-pass" name="password" placeholder="Enter your password" autocomplete="current-password" required aria-required="true">
         </div>
-        <div class="msg msg-err" id="login-error"></div>
-        <div class="msg msg-ok"  id="login-success"></div>
-        <button type="submit" class="btn-submit" id="login-btn">⚡ ACCESS VENUEFLOW</button>
+        <div class="msg msg-err" id="login-error" role="alert" aria-live="assertive"></div>
+        <div class="msg msg-ok"  id="login-success" role="status" aria-live="polite"></div>
+        <button type="submit" class="btn-submit" id="login-btn" aria-label="Sign in to VenueFlow">⚡ ACCESS VENUEFLOW</button>
       </form>
       <p style="text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,.35)">
         No account? <span class="link-text" onclick="switchTab('register')">Register here →</span>
