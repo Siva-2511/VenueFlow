@@ -17,7 +17,7 @@ def analyze_crowd_data(gate_data):
             f"to handle the crowd distribution safely and efficiently."
         )
         response = client.models.generate_content(
-            model='gemini-2.5-flash-lite', # Updated to 2026 high-quota model
+            model='gemini-2.0-flash', # Synchronized to 2.0 Flash as per documentation
             contents=prompt,
         )
         return response.text
@@ -67,7 +67,7 @@ def get_chat_response(message, role, context_data):
 
         try:
             response = client.models.generate_content(
-                model='gemini-2.5-flash-lite',
+                model='gemini-2.0-flash',
                 config={
                     'system_instruction': system_instruction,
                     'safety_settings': safety_settings

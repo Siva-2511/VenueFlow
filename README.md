@@ -1,7 +1,7 @@
 # 🏟️ VenueFlow AI | Tactical Crowd Orchestration
 # **Hack2skill PromptWars | Physical Event Experience**
 
-[![Google Gemini](https://img.shields.io/badge/Google-Gemini_2.5_Flash-blue?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini_2.0_Flash-blue?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
 [![Security](https://img.shields.io/badge/Security-PBKDF2--SHA256-green)](https://owasp.org/)
 [![A11y](https://img.shields.io/badge/Accessibility-WCAG_2.1-orange)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![Three.js](https://img.shields.io/badge/Graphics-Three.js-black?logo=three.js&logoColor=white)](https://threejs.org/)
@@ -10,7 +10,7 @@
 **Live**: [venueflow-cxn6.onrender.com](https://venueflow-cxn6.onrender.com)
 **Code**: [github.com/Siva-2511/VenueFlow](https://github.com/Siva-2511/VenueFlow)
 
-**VenueFlow AI** is a next-generation crowd management platform designed for the extreme demands of **IPL 2026**. By blending **Real-time 3D Digital Twins**, **Gemini-powered Advisory**, and **Synchronous Edge Synchronization**, VenueFlow transforms chaotic stadium entry into a seamless, high-resilience experience.
+**VenueFlow AI** is a next-generation crowd management platform designed for the extreme demands of **IPL 2026**. By blending **Real-time 3D Digital Twins**, **Gemini 2.0 Flash-powered Advisory**, and **Synchronous Edge Synchronization**, VenueFlow transforms chaotic stadium entry into a seamless, high-resilience experience.
 
 ---
 
@@ -35,7 +35,7 @@ where bottlenecked entry points create safety hazards and logistical failures.
 Our approach, **"Tactical Sync"**, treats the stadium as a live, breathing organism. 
 1. **Digital Twin Logic**: A real-time 3D model (Three.js) mirrors every gate status.
 2. **Synchronous Broadcast**: Every scan, lock, or redirect is broadcasted via WebSockets (Socket.IO) in <50ms.
-3. **AI Feedback Loop**: Gemini 2.5 Flash analyzes real-time density and provides "Pro-Tips" to users to balance the stadium load proactively.
+3. **AI Feedback Loop**: Gemini 2.0 Flash analyzes real-time density and provides "Pro-Tips" to users to balance the stadium load proactively.
 
 ---
 
