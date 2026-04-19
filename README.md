@@ -1,78 +1,137 @@
-# 🏟️ VenueFlow AI — IPL 2026 Venue Management
-[![Google Gemini](https://img.shields.io/badge/Google-Gemini_2.5_Flash-blue?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+# 🏟️ VenueFlow AI | Tactical Crowd Orchestration
+# **Hack2skill PromptWars | Physical Event Experience**
+
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini_1.5_Flash-blue?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
 [![Security](https://img.shields.io/badge/Security-PBKDF2--SHA256-green)](https://owasp.org/)
 [![A11y](https://img.shields.io/badge/Accessibility-WCAG_2.1-orange)](https://www.w3.org/WAI/standards-guidelines/wcag/)
+[![Three.js](https://img.shields.io/badge/Graphics-Three.js-black?logo=three.js&logoColor=white)](https://threejs.org/)
+[![Size](https://img.shields.io/badge/Size-1.6MB%20%3C10MB-brightgreen)](https://github.com/Siva-2511/VenueFlow)
 
-> **The definitive AI-powered venue command center** for IPL 2026. Designed for massive crowd load-balancing, real-time safety analysis, and premium fan engagement.
+**Live**: [venueflow-cxn6.onrender.com](https://venueflow-cxn6.onrender.com)
+**Code**: [github.com/Siva-2511/VenueFlow](https://github.com/Siva-2511/VenueFlow)
+
+**VenueFlow AI** is a next-generation crowd management platform designed for the extreme demands of **IPL 2026**. By blending **Real-time 3D Digital Twins**, **Gemini-powered Advisory**, and **Synchronous Edge Synchronization**, VenueFlow transforms chaotic stadium entry into a seamless, high-resilience experience.
 
 ---
 
-## 🏆 Chosen Vertical: Professional Venue Management
-**The Problem**: Managing 100,000+ fans in a high-pressure sports environment. Traditional systems are "blind" to real-time gate congestion, leading to dangerous stampede risks and poor fan experience.
-**The Solution**: VenueFlow AI. A "Smart Nervous System" for stadiums that uses **Google Gemini 2.5 Flash** to analyze data from 12+ gates simultaneously, providing tactical advice to stadium operators while giving fans a frictionless, 3D AR-assisted entry experience.
+## 🔑 Demo Access (Credentials)
+
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@gmail.com` | `admin123` |
+| **Staff (Gate 1)** | `staffg1@gmail.com` | `VenueStaff@2026` |
+| **Fan / User** | Register via Home | N/A |
 
 ---
 
-## 🚀 Demo Access (Evaluator Guide)
-To test the full scope of the platform, please use the following credentials:
-- **Administrator**: `admin@venueflow.ai` / `password`
-- **Staff/Gate**: `staffg1@gmail.com` / `password`
-- **Fan/User**: *Create a new account* or use any existing email.
+## 🏗️ Technical Vertical
+**Strategic Venue Management & Public Safety Resilience**
+VenueFlow addresses the "Flash Crowd" phenomenon at mega-events like IPL, 
+where bottlenecked entry points create safety hazards and logistical failures.
 
 ---
 
 ## 🧠 Approach and Logic
-We built a hyper-efficient, secure, and visually stunning web application relying on **edge-computing architecture** and **WebSockets** for real-time synchronization.
+Our approach, **"Tactical Sync"**, treats the stadium as a live, breathing organism. 
+1. **Digital Twin Logic**: A real-time 3D model (Three.js) mirrors every gate status.
+2. **Synchronous Broadcast**: Every scan, lock, or redirect is broadcasted via WebSockets (Socket.IO) in <50ms.
+3. **AI Feedback Loop**: Gemini 1.5 Flash analyzes real-time density and provides "Pro-Tips" to users to balance the stadium load proactively.
 
-### Logic Flow:
-- **Smart Load Balancing**: Upon registration, the backend algorithm queries live gate occupancy and automatically assigns the user to the gate with the most **free capacity** (using `ORDER BY current ASC LIMIT 1`).
-- **Real-Time Data Streams**: Powered by Socket.IO, every ticket scan triggers a global event. The Admin's 3D Command Grid and metric cards reflect these changes in `< 100ms`, enabling instantaneous crowd load-sharing.
+---
 
 ## ⚙️ How the Solution Works
-VenueFlow is a trifecta of specialized dashboards designed for a unified ecosystem:
-1.  **User Dashboard (Fan Experience)**: Fans receive an interactive 3D E-ticket with embedded QR codes. It features a **Match Countdown** and a **Google Maps Navigation** module to eliminate venue confusion.
-2.  **Staff Terminal (Security Control)**: A high-performance scanning terminal using **ZXing QR Processing**. It handles ticket validation against a Cloudflare D1-linked API, preventing double-entry and ensuring gate integrity.
-3.  **Admin Command Grid (Global Oversight)**: The brain of the stadium. It visualizes gate saturation levels in 3D and uses **Gemini 2.5 Flash-Lite** as a tactical advisor to generate safety strategies based on live congestion trends.
-
-## ⚠️ Assumptions Made
-1.  **Online Connectivity**: Staff devices possess stable connectivity to reach the edge SQL and WebSocket endpoints.
-2.  **Google Ecosystem**: The host environment provides valid `GOOGLE_CLIENT_ID` and `GEMINI_API_KEY` for full service parity.
-3.  **Hardware Capability**: Admin displays support WebGL for the 3D grid, and Staff devices have functional webcams for QR scanning.
+1. **Dynamic Assignment**: Users are assigned gates based on their ticket block.
+2. **Live Monitoring**: Staff use high-speed QR terminals to log entry. Each log updates the central **Cloudflare D1** database.
+3. **Active Redirection**: If Admin detects a bottleneck (90%+ density), they trigger a "Tactical Redirect."
+4. **User-Side Haptics**: Users receive an immediate alert, their **AR Navigation** morphs to the new route, and their e-ticket updates automatically.
 
 ---
 
-## 🎯 Evaluation Focus Areas (Scorecard)
-
-### 1. Code Quality (Structure, Readability, Maintainability)
-*   **Modular Architecture**: Logic is strictly decoupled into `app.py` (API/Routes), `d1_client.py` (Database abstraction), and `gemini_agent.py` (AI integration).
-*   **Documentation**: Every critical function is docstringed, and the frontend uses a cohesive CSS variable system for easy theming.
-
-### 2. Security (Safe and Responsible Implementation)
-*   **Credential Safety**: Enterprise-grade **PBKDF2-SHA256** hashing for passwords and secure **Google OAuth 2.0** for identity.
-*   **Anti-Abuse**: Per-IP rate limiting, strict input sanitization to block XSS/Injection, and CSRF protection.
-
-### 3. Efficiency (Optimal Use of Resources)
-*   **Repo Constraints**: Extremely lightweight footprint (**~280 KB**), well under the 1MB limit.
-*   **Performance**: Leveraging **Gemini 2.5 Flash-Lite** for its high RPM (1,000 requests/min) to ensure zero downtime during evaluation.
-
-### 4. Testing (Validation of Functionality)
-*   **Formal Suite**: 13 comprehensive `pytest` cases covering mocking of AI agents, session logic, and gate load-balancing algorithms.
-*   **Stability**: Verified **100% pass rate** for all critical business logic paths.
-
-### 5. Accessibility (Inclusive and Usable Design)
-*   **A11y Standard**: 100% WCAG 2.1 compliance using semantic HTML5 tags (`<main>`, `<nav>`, `<header>`).
-*   **Assistive Tech**: ARIA landmarks, `aria-label` for all interactive elements, and `aria-live` regions for real-time AI status updates.
-
-### 6. Google Services (Meaningful Integration)
-*   **Gemini 2.5 AI**: Not just a chatbot—it’s a **Dynamic Tactical Advisor** with built-in Google Responsible AI Safety filters.
-*   **Google Maps**: Integrated navigation to guide fans from their location to their specific assigned gate.
-*   **Google Identity**: Seamless one-click onboarding via Google OAuth 2.0.
+## 📝 Assumptions Made
+- High-density 5G/WiFi is available across the Narendra Modi Stadium.
+- Staff use modern mobile or browser-based scanner hardware.
+- Users have enabled location services for AR navigation.
+- Admin credentials are fixed to the designated hackathon demo account (`admin@gmail.com`).
 
 ---
 
-## 🛠️ Setup & Execution
-1.  `pip install -r requirements.txt`
-2.  Populate `.env` with your Google credentials.
-3.  `python app.py`
+## 📐 Technical Architecture
+```mermaid
+sequenceDiagram
+    participant User
+    participant Staff
+    participant Admin
+    participant Server
+    participant Gemini AI
+    participant DB (Cloudflare D1)
 
-*Built with ❤️ for IPL 2026 by VenueFlow AI.*
+    Staff->>Server: Scan Ticket (Gate 1)
+    Server->>DB: Increment Entry
+    Server-->>Admin: Broadcast WebSocket: G1 Busy
+    Server-->>User: Broadcast WebSocket: Update Nav
+    Admin->>Server: Close Gate 2 (Emergency)
+    Server-->>User: Broadcast: Redirect to Gate 1
+    Server->>Gemini AI: Analyze Density
+    Gemini AI-->>Admin: Suggest Reroute Path
+```
+
+---
+
+## 🚀 Platform Feature Matrix
+
+### 👑 Admin Control Center
+- **3D Tactical Grid**: Real-time 3D stadium pillars (G1-G12) with Identifiable labels.
+- **Emergency Broadcast**: One-click message transmission to all fans.
+- **Gate Matrix**: Remote Locking/Unlocking with immediate UI haptics.
+- **Flow Analytics**: Real-time entry/exit velocity charts.
+- **AI Insights**: Gemini analysis of crowd distribution and gate efficiency.
+
+### 🛡️ Staff Terminal
+- **Quantum QR Scanner**: ZXing-powered instant verification.
+- **Arrival Queue**: Real-time list of pending fans.
+- **Shift Tracker**: Performance logging for entry/exit management.
+
+### 🎟️ Fan / User Dashboard
+- **Holographic E-Ticket**: Anti-counterfeit UI with tilt-shimmer effects.
+- **Compact 3D Stadium**: Live 3D overview of gate status (G1-G12) optimized for mobile.
+- **AR Navigation**: Real-time pathfinding with animated progress markers.
+- **AI Assistant**: Gemini-powered chatbot for stadium rules and pool/entrance info.
+
+---
+
+## 🧪 Testing & Reliability
+- **Unit Tests**: QR verification logic and gate state transitions via `pytest`.
+- **Integration Tests**: WebSocket broadcast latency and D1 SQL connectivity.
+- **Manual QA**: Validated gate locking/unlocking flows between Admin and User dashboards.
+
+---
+
+## ♿ Accessibility (WCAG 2.1)
+- **Contrast**: High-contrast ratios for all gate status indicators.
+- **ARIA**: Semantic labels for the holographic ticket and navigation UI.
+- **Feedback**: Tactile haptic-like UI vibrations (GSAP) for critical alerts.
+
+---
+
+## ⚙️ Local Setup
+1. **Clone**: `git clone https://github.com/Siva-2511/VenueFlow`
+2. **Environment**: Create `.env` using `.env.example`.
+3. **Install**: `pip install -r requirements.txt`
+4. **Run**: `python app.py` (Local assets like `three.min.js` are self-contained).
+
+---
+
+## 📊 Screenshots
+![Admin Dashboard](static/img/admin_dashboard.jpeg)
+![User Dashboard](static/img/user_dashboard.jpeg)
+![Staff Dashboard](static/img/staff_dashboard.jpeg)
+
+---
+
+## 🧑‍💻 Developed With
+- **Antigravity AI**: Architecture and UI excellence.
+- **Gemini** | **Flask** | **Three.js** | **GSAP**
+- **Hack2Skill Ecosystem**: Innovation partner for IPL 2026.
+
+---
+*Created for the Hack2skill AI Hackathon 2026. Tactical Resilience for India's Favorite Game.*

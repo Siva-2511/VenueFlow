@@ -4,10 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VenueFlow | IPL 2026 — Your E-Ticket</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/qrious.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/gsap.min.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<meta name="theme-color" content="#6366f1">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register("{{ url_for('static', filename='service-worker.js') }}").then(r => {}).catch(e => {});
+    });
+  }
+</script>
 <script>tailwind={config:{}}</script>
 <script>const __origWarn = console.warn; console.warn = function(...args){ if(typeof args[0]==="string" && args[0].includes("cdn.tailwindcss"))return; __origWarn.apply(console, args); };</script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -74,19 +84,21 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
 </div>
 
 <!-- NAV -->
-<nav class="sticky top-0 z-50 glass-bright border-b border-indigo-500/20 px-5 py-3 flex items-center justify-between">
-  <div class="flex items-center gap-3">
-    <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-lg shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 0 20px rgba(99,102,241,.4)">{{ name[:1].upper() }}</div>
-    <div>
-      <p class="font-orb text-sm font-black tracking-wider gt-purple">{{ name }}</p>
-      <p class="text-[10px] font-mono" style="color:rgba(255,255,255,.35)">{{ email }}</p>
+<header class="sticky top-0 z-50 glass-bright border-b border-indigo-500/20 py-3" role="banner">
+  <div class="max-w-lg mx-auto px-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-lg shrink-0" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 0 20px rgba(99,102,241,.4)">{{ name[:1].upper() }}</div>
+      <div class="min-w-0">
+        <p class="font-orb text-sm font-black tracking-wider gt-purple truncate">{{ name }}</p>
+        <p class="text-[10px] font-mono truncate" style="color:rgba(255,255,255,.35)">{{ email }}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full border font-orb" style="color:#f59e0b;background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.25)">🏏 IPL 2026</span>
+      <a href="/logout" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border" style="color:#ef4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)">EXIT</a>
     </div>
   </div>
-  <div class="flex items-center gap-2">
-    <span class="text-[9px] font-bold uppercase px-2.5 py-1 rounded-full border font-orb" style="color:#f59e0b;background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.25)">🏏 IPL 2026</span>
-    <a href="/logout" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border" style="color:#ef4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)">EXIT</a>
-  </div>
-</nav>
+</header>
 
 <!-- Match Countdown Banner -->
 <div class="glass-bright border-b border-indigo-500/10 px-4 py-3">
@@ -215,6 +227,23 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
 
   <!-- ══════════ GATE ══════════ -->
   <div id="tab-gate" class="tab-p space-y-4">
+    <!-- 3D Stadium Grid (Compact) -->
+    <div class="glass rounded-2xl p-4 border border-indigo-500/20 relative overflow-hidden">
+      <div class="flex justify-between items-center mb-3">
+        <p class="font-orb text-[8px] font-black tracking-widest" style="color:rgba(255,255,255,.55)">3D STADIUM GRID — LIVE</p>
+        <div id="stadium-status-user" class="text-[7px] font-mono font-bold text-indigo-400 uppercase tracking-widest">Live Sync OK</div>
+      </div>
+      <div class="stadium-wrap-user" style="height:140px;position:relative;background:radial-gradient(circle at center,rgba(99,102,241,.05),transparent 70%)">
+        <canvas id="stadium-canvas-user" style="width:100%;height:100%"></canvas>
+      </div>
+      <div class="mt-3 flex justify-center gap-4">
+        <div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full" style="background:#3b82f6"></div><span class="text-[7px] font-mono text-white/40">OPEN</span></div>
+        <div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full" style="background:#f59e0b"></div><span class="text-[7px] font-mono text-white/40">BUSY</span></div>
+        <div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full" style="background:#ef4444"></div><span class="text-[7px] font-mono text-white/40">FULL</span></div>
+        <div class="flex items-center gap-1.5"><div class="w-1.5 h-1.5 rounded-full" style="background:#374151"></div><span class="text-[7px] font-mono text-white/40">CLOSED</span></div>
+      </div>
+    </div>
+
     <div class="glass rounded-2xl p-6 border border-indigo-500/15">
       <div class="flex justify-between items-center mb-6">
         <div>
@@ -313,7 +342,6 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
            </iframe>
         </div>
         {% else %}
-        <!-- Placeholder for missing Maps Key -->
         <div class="absolute inset-0 z-0 flex flex-col items-center justify-center p-8 text-center" style="background:linear-gradient(135deg,rgba(99,102,241,.05),rgba(6,182,212,.05))">
           <div class="text-4xl mb-3 opacity-40">📍</div>
           <p class="font-orb text-[10px] font-black tracking-widest text-indigo-400 mb-4">VENUE LOCATION</p>
@@ -467,7 +495,7 @@ body{background:radial-gradient(ellipse at top left,#08041e 0%,#020010 55%)}
 </main>
 
 <!-- Footer — visible on all themes -->
-<footer class="vf-footer relative z-10">
+<footer class="vf-footer relative z-10" role="contentinfo">
   <div class="max-w-lg mx-auto">
     <div class="flex items-center justify-center gap-2 mb-2">
       <div class="w-6 h-6 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">🎟</div>
@@ -594,6 +622,9 @@ function switchTab(id,btn){
     }
   }
   if (btn) btn.classList.add('active');
+  
+  // Trigger resize to fix Three.js initialization in hidden containers
+  setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 50);
 }
 
 /* ── QR tap flash ─────────────────────────────────────────── */
@@ -675,7 +706,100 @@ function updateUserGateStatus(gateData,gateId){
   dot.style.background=c.tc;
   if(orbRing)orbRing.style.borderColor=c.orbRing;
   const hint=document.getElementById('gate-hint');if(hint)hint.innerText=c.hint;
+
+  // Sync to 3D stadium
+  if(window._updateStadiumPillar) window._updateStadiumPillar(gateId-1, info.current/info.max, info.status);
 }
+
+/* ── Three.js Stadium (User Compact) ─────────────────────────── */
+let stadiumPillars=[];
+(function(){
+  if(!window.THREE){document.getElementById('stadium-status-user').innerText='3D OFFLINE';return;}
+  const wrap=document.querySelector('.stadium-wrap-user');
+  const canvas=document.getElementById('stadium-canvas-user');
+  if(!wrap || !canvas) return;
+  const W=wrap.clientWidth, H=wrap.clientHeight;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setSize(W,H); renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(40, W/H, .1, 100);
+  camera.position.set(0, 10, 6); camera.lookAt(0,0,0);
+
+  scene.add(new THREE.AmbientLight(0x201a40, 1.2));
+  const dir=new THREE.DirectionalLight(0x818cf8, 1); dir.position.set(5,8,5); scene.add(dir);
+
+  const ground=new THREE.Mesh(new THREE.CircleGeometry(4.5, 32), new THREE.MeshBasicMaterial({color:0x0a0520,transparent:true,opacity:.6}));
+  ground.rotation.x=-Math.PI/2; scene.add(ground);
+
+  function createTextSprite(text, color) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    // High-DPI texture drawing
+    canvas.width = 512; canvas.height = 256; 
+    ctx.scale(2, 2);
+    ctx.fillStyle = color;
+    ctx.font = 'bold 80px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 128, 64);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(1.4, 0.7, 1);
+    return sprite;
+  }
+
+  const colors={open:0x3b82f6,busy:0xf59e0b,full:0xef4444,closed:0x374151};
+  for(let i=0;i<12;i++){
+    const angle=(i/12)*Math.PI*2;
+    const x=Math.sin(angle)*3.5, z=Math.cos(angle)*3.5;
+    const baseH=.15;
+    const geo=new THREE.CylinderGeometry(.18, .22, baseH, 12);
+    const mat=new THREE.MeshPhongMaterial({color:colors.open,emissive:new THREE.Color(colors.open),emissiveIntensity:.6,transparent:true,opacity:.9});
+    const pillar=new THREE.Mesh(geo,mat);
+    pillar.position.set(x,baseH/2,z);
+    scene.add(pillar);
+
+    const label = createTextSprite(`G${i+1}`, '#ffffff');
+    label.position.set(x, 0.8, z);
+    scene.add(label);
+
+    const light=new THREE.PointLight(colors.open, 1.2, 2);
+    light.position.set(x, 1, z); scene.add(light);
+    stadiumPillars.push({mesh:pillar,light,label,baseX:x,baseZ:z});
+  }
+
+  let rot=0;
+  function animate(){
+    requestAnimationFrame(animate);
+    rot+=.005;
+    scene.rotation.y=rot;
+    stadiumPillars.forEach(p => p.label.rotation.set(0, -rot, 0));
+    renderer.render(scene,camera);
+  }
+  animate();
+
+  window._updateStadiumPillar=(idx,pct,status)=>{
+    const p=stadiumPillars[idx]; if(!p)return;
+    const c={open:0x3b82f6,busy:0xf59e0b,full:0xef4444,closed:0x374151}[status]||0x3b82f6;
+    const targetH=Math.max(.15, .15+pct*3.5);
+    gsap.to(p.mesh.position, {y:targetH/2, duration:1, ease:'power2.out'});
+    gsap.to(p.mesh.scale, {y:targetH/.15, duration:1, ease:'power2.out'});
+    gsap.to(p.label.position, {y:targetH+0.5, duration:1, ease:'power2.out'});
+    p.mesh.material.color.set(c); p.mesh.material.emissive.set(c);
+    p.light.color.set(c);
+    if(status==='closed'){p.mesh.material.opacity=.4;} else {p.mesh.material.opacity=.9;}
+  };
+
+  window.addEventListener('resize',()=>{
+    const W2=wrap.clientWidth,H2=wrap.clientHeight;
+    camera.aspect=W2/H2; camera.updateProjectionMatrix(); renderer.setSize(W2,H2);
+  });
+})();
 </script>
 {% include 'chatbot_snippet.html' %}
 </body>

@@ -20,6 +20,8 @@ def execute(sql, params=None):
 
     try:
         response = requests.post(BASE_URL, headers=HEADERS, json=payload, timeout=10)
+        if response.status_code != 200:
+            pass
         response.raise_for_status()
         res_json = response.json()
 
@@ -29,10 +31,9 @@ def execute(sql, params=None):
                 if "results" in result:
                     return result["results"]
         else:
-            print("D1 Error:", res_json.get("errors"))
+            pass
         return []
-    except Exception as e:
-        print(f"D1 API Exception: {e}")
+    except Exception:
         return []
 
 
@@ -45,12 +46,10 @@ def _get_existing_columns(table: str) -> set:
 def _add_column_if_missing(table: str, col: str, col_def: str, existing: set):
     """Send ALTER TABLE only when the column is genuinely absent."""
     if col not in existing:
-        print(f"  Adding column: {table}.{col}")
         execute(f"ALTER TABLE {table} ADD COLUMN {col} {col_def}")
 
 
 def init_db():
-    print("Ensuring D1 schema exists...")
 
     # ── Gates ───────────────────────────────────────────────────────
     execute("""
@@ -106,12 +105,10 @@ def init_db():
     count = gates[0].get("count", 0) if gates else 0
 
     if count == 0:
-        print("Seeding 12 gates...")
         for i in range(1, 13):
             execute(
                 "INSERT OR IGNORE INTO gates (id, name, staff_email, capacity) VALUES (?, ?, ?, ?)",
                 [i, f"Gate {i}", f"staffg{i}@gmail.com", 200]
             )
-        print("Gates seeded successfully.")
 
-    print("D1 schema ready.")
+    return

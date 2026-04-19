@@ -79,7 +79,6 @@ def get_chat_response(message, role, context_data):
             error_str = str(e)
             if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
                 return "VenueFlow AI is currently handling a high volume of requests. Please try again in a few moments! 🏏"
-            print(f"Gemini API Error: {e}")
             return "I'm having trouble connecting to my knowledge base right now. Please try again later."
     except Exception as e:
         return f"Bot Error: {str(e)}"

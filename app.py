@@ -38,7 +38,15 @@ app.config['SESSION_COOKIE_SECURE']    = bool(os.environ.get('RENDER'))  # True 
 app.config['SESSION_COOKIE_NAME']       = 'vf_session'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
 app.config['SESSION_PERMANENT']         = True
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+# --- CORS allowed origins (Production + Local Dev) ---
+ALLOWED_ORIGINS = [
+    "https://venueflow-cxn6.onrender.com",
+    "http://127.0.0.1:8080",
+    "http://localhost:8080",
+    "http://127.0.0.1:5000",
+    "http://localhost:5000"
+]
+socketio = SocketIO(app, cors_allowed_origins=ALLOWED_ORIGINS, async_mode='eventlet')
 
 # ── Credentials loaded from .env — NO plaintext in source ─────────────
 ADMIN_EMAIL     = os.environ.get('ADMIN_EMAIL', 'admin@gmail.com')
@@ -291,7 +299,6 @@ def google_auth_callback():
                 login_user(User(email, role, gate_id, name))
                 return redirect(url_for('user_dashboard'))
             else:
-                # New Google user — save temp session state, send to match selection
                 session['pending_google_email'] = email
                 session['pending_google_name']  = name
                 return redirect(url_for('select_match_page'))
@@ -303,8 +310,7 @@ def google_auth_callback():
         )
         login_user(User(email, role, gate_id, name))
         return redirect(url_for(f'{role}_dashboard'))
-    except Exception as e:
-        print(f'Google callback error: {e}')
+    except Exception:
         return redirect(url_for('login') + '?google_error=5')
 
 # Legacy GSI One-Tap endpoint (kept for backwards compat)
@@ -718,11 +724,13 @@ def gate_users(gate_id):
 @app.route('/api/admin/ai_insight')
 @login_required
 def get_ai_insight():
-    if current_user.role != 'admin':
-        return jsonify({'status':'error','message':'Unauthorized'}), 403
+    user_role  = current_user.role if hasattr(current_user, 'role') else 'None'
+
+    if not current_user.is_authenticated or user_role != 'admin':
+        return jsonify({'status':'error','message':'Unauthorized — strictly admin only.'}), 403
     
     stats = d1_client.execute(
-        '''SELECT assigned_gate as gate_id, COUNT(id) as count
+        '''SELECT assigned_gate as gate_id, COUNT(email) as count
            FROM users WHERE assigned_gate IS NOT NULL GROUP BY assigned_gate'''
     )
     insight = gemini_agent.analyze_crowd_data(str(stats))

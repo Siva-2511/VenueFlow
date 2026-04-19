@@ -3,7 +3,7 @@ let socket;
 function initWebSockets(role, currentGateName = null, gateId = null) {
     socket = io();
     
-    socket.on('connect', () => console.log('[VenueFlow] WS OK'));
+    socket.on('connect', () => {});
     
     socket.on('gate_update', (data) => {
         if (role === 'admin') updateAdminDashboard(data);

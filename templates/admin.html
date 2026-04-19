@@ -8,10 +8,10 @@
 <script>tailwind={config:{}}</script>
 <script>const __origWarn = console.warn; console.warn = function(...args){ if(typeof args[0]==="string" && args[0].includes("cdn.tailwindcss"))return; __origWarn.apply(console, args); };</script>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{{ url_for('static', filename='js/gsap.min.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 body{background:#020010;overflow-x:hidden}
@@ -261,6 +261,28 @@ let stadiumPillars=[];
 
   // 12 Gate pillars
   const colors={open:0x3b82f6,busy:0xf59e0b,full:0xef4444,closed:0x374151};
+  function createTextSprite(text, color) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    // High-DPI texture drawing (2x supersampling)
+    canvas.width = 512; canvas.height = 256; 
+    ctx.scale(2, 2);
+    ctx.fillStyle = color;
+    ctx.font = 'bold 80px Orbitron';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 128, 64);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.generateMipmaps = true;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(1.5, 0.75, 1);
+    return sprite;
+  }
+
   for(let i=0;i<12;i++){
     const angle=(i/12)*Math.PI*2;
     const x=Math.sin(angle)*5.5,z=Math.cos(angle)*5.5;
@@ -271,12 +293,16 @@ let stadiumPillars=[];
     pillar.position.set(x,baseH/2,z);
     scene.add(pillar);
 
+    // Add Gate Label Sprite
+    const label = createTextSprite(`G${i+1}`, '#ffffff');
+    label.position.set(x, 1.2, z);
+    scene.add(label);
+
     // Point light above each gate
     const light=new THREE.PointLight(colors.open,1.5,2.5);
     light.position.set(x,1.5,z);scene.add(light);
 
-    // Label sprite (simplified)
-    stadiumPillars.push({mesh:pillar,light,baseX:x,baseZ:z,gateNum:i+1,targetH:baseH});
+    stadiumPillars.push({mesh:pillar,light,label,baseX:x,baseZ:z,gateNum:i+1,targetH:baseH});
   }
 
   // Rotation
@@ -285,6 +311,8 @@ let stadiumPillars=[];
     requestAnimationFrame(animate);
     rot+=.004;
     scene.rotation.y=rot;
+    // Keep labels facing camera
+    stadiumPillars.forEach(p => { p.label.rotation.set(0, -rot, 0); });
     // Breathe ring
     ring.material.opacity=.15+Math.sin(Date.now()*.002)*.08;
     cLight.intensity=1.5+Math.sin(Date.now()*.003)*.5;
@@ -298,6 +326,8 @@ let stadiumPillars=[];
     const targetH=Math.max(.2,.2+pct*6);
     gsap.to(p.mesh.position,{y:targetH/2,duration:1,ease:'elastic.out(1,.7)'});
     gsap.to(p.mesh.scale,{y:targetH/.2,duration:1,ease:'elastic.out(1,.7)'});
+    // Update label height too
+    gsap.to(p.label.position, { y: targetH + 0.8, duration: 1, ease: 'elastic.out(1,.7)' });
     p.mesh.material.color.set(c);p.mesh.material.emissive.set(c);
     p.light.color.set(c);
     if(status==='full'){p.mesh.material.emissiveIntensity=1.2;p.light.intensity=3;}
@@ -426,7 +456,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   initWebSockets('admin');
 
   // ── Load real stats from DB so flow chart total persists after refresh ──
-  fetch('/api/stats',{credentials:'same-origin'})
+  fetch('/api/stats', {credentials: 'same-origin'})
     .then(r=>r.json())
     .then(d=>{
       totalEntries = d.total_entries || 0;
@@ -454,7 +484,7 @@ window._updateTotalCrowdKPI=(total,max)=>{
 
 
 function fetchAIInsights() {
-  fetch('/api/admin/ai_insight')
+  fetch('/api/admin/ai_insight', {credentials: 'same-origin'})
     .then(r => r.json())
     .then(d => {
       if (d.status === 'success' && d.insight) {

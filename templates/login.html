@@ -10,6 +10,15 @@
 <script>const __origWarn = console.warn; console.warn = function(...args){ if(typeof args[0]==="string" && args[0].includes("cdn.tailwindcss"))return; __origWarn.apply(console, args); };</script>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<meta name="theme-color" content="#6366f1">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register("{{ url_for('static', filename='service-worker.js') }}").then(r => {}).catch(e => {});
+    });
+  }
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -234,7 +243,7 @@ select.field-input option{background:#0a0628;color:#fff}
   </div>
 </div>
 
-<div class="page-footer">© 2026 VENUEFLOW AI · SECURED · v8.0</div>
+<footer class="page-footer" role="contentinfo">© 2026 VENUEFLOW AI · SECURED · v8.0</footer>
 
 <script>
 /* ─── Particle canvas ─────────────────────────────────────────── */
