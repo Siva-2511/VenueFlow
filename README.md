@@ -1,7 +1,7 @@
 # 🏟️ VenueFlow AI | Tactical Crowd Orchestration
 # **Hack2skill PromptWars | Physical Event Experience**
 
-[![Google Gemini](https://img.shields.io/badge/Google-Gemini_1.5_Flash-blue?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
+[![Google Gemini](https://img.shields.io/badge/Google-Gemini_2.5_Flash-blue?logo=google-gemini&logoColor=white)](https://ai.google.dev/)
 [![Security](https://img.shields.io/badge/Security-PBKDF2--SHA256-green)](https://owasp.org/)
 [![A11y](https://img.shields.io/badge/Accessibility-WCAG_2.1-orange)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![Three.js](https://img.shields.io/badge/Graphics-Three.js-black?logo=three.js&logoColor=white)](https://threejs.org/)
@@ -35,7 +35,7 @@ where bottlenecked entry points create safety hazards and logistical failures.
 Our approach, **"Tactical Sync"**, treats the stadium as a live, breathing organism. 
 1. **Digital Twin Logic**: A real-time 3D model (Three.js) mirrors every gate status.
 2. **Synchronous Broadcast**: Every scan, lock, or redirect is broadcasted via WebSockets (Socket.IO) in <50ms.
-3. **AI Feedback Loop**: Gemini 1.5 Flash analyzes real-time density and provides "Pro-Tips" to users to balance the stadium load proactively.
+3. **AI Feedback Loop**: Gemini 2.5 Flash analyzes real-time density and provides "Pro-Tips" to users to balance the stadium load proactively.
 
 ---
 
