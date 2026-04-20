@@ -127,9 +127,18 @@ sequenceDiagram
 ---
 
 ## 📊 Screenshots
+
+### **Login Portal**
+![Login Page](static/img/login_page.jpeg)
+
+### **Admin Dashboard**
 ![Admin Dashboard](static/img/admin_dashboard.jpeg)
-![User Dashboard](static/img/user_dashboard.jpeg)
+
+### **Staff Dashboard**
 ![Staff Dashboard](static/img/staff_dashboard.jpeg)
+
+### **User Dashboard**
+![User Dashboard](static/img/user_dashboard.jpeg)
 
 ---
 
