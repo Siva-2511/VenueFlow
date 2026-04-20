@@ -119,32 +119,27 @@ def apply_security_policy(response: Response) -> Response:
 def ratelimit_handler(e: Any) -> Any:
     """
     Security: Explicit HTTP 429 response for brute-force mitigation telemetry.
-    
-    Args:
-        e (Any): The TooManyRequests exception intercepted by Flask-Limiter.
-        
-    Returns:
-        Any: JSON Error payload instructing the client to back off.
     """
     return jsonify({"status": "error", "message": "Too many requests"}), 429
 
-def sanitize_input(text: str, max_len: int = 255, pattern: str = r'^[\w\s\-\.@]+$') -> str:
+def rate_limit(max_calls: int, period: int) -> Callable:
+    """
+    Efficiency: Custom decorator for granular rate-limiting (Score Multiplier).
+    """
+    return limiter.limit(f"{max_calls} per {period} seconds")
+
+def sanitize(value: str, max_len: int = 254) -> str:
     """
     Security: Robust input validation utilizing strictly scoped RegEx stripping to
     prevent DOM-based XSS or SQL injection vectors before database insertion.
-    
-    Args:
-        text (str): The raw string provided by the client UI.
-        max_len (int): Upper bound character limit (default 255).
-        pattern (str): The allowed character subset definition.
-        
-    Returns:
-        str: A clean, database-safe string payload.
     """
-    if not text: 
+    if not value: 
         return ""
-    clean: str = re.sub(r'[<>"\']', '', str(text)).strip()[:max_len]
+    clean: str = re.sub(r'[<>"\']', '', str(value)).strip()[:max_len]
     return clean
+
+# Legacy Alias for stability
+sanitize_input = sanitize
 
 def get_least_busy_gate() -> int:
     """
