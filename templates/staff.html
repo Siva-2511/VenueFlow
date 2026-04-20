@@ -1,135 +1,319 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VenueFlow | Staff Terminal — {{ gate.name }}</title>
-<link rel="icon" href="/static/favicon.ico">
-<script>tailwind={config:{}}</script>
-<script>const __origWarn = console.warn; console.warn = function(...args){ if(typeof args[0]==="string" && args[0].includes("cdn.tailwindcss"))return; __origWarn.apply(console, args); };</script>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<style>
-body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VenueFlow | Staff Terminal — {{ gate.name }}</title>
+  <link rel="icon" href="/static/favicon.ico">
+  <script>tailwind = { config: {} }</script>
+  <script>const __origWarn = console.warn; console.warn = function (...args) { if (typeof args[0] === "string" && args[0].includes("cdn.tailwindcss")) return; __origWarn.apply(console, args); };</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js" crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VENUEFLOW"></script>
+  <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-VENUEFLOW');</script>
+  <!-- Google Search Console -->
+  <meta name="google-site-verification" content="VENUEFLOW-STAFF-SECURE-2026">
+  <!-- Google Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "StadiumOrArena",
+  "name": "Narendra Modi Stadium - Staff Sector",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Ahmedabad",
+    "addressRegion": "Gujarat",
+    "addressCountry": "IN"
+  }
+}
+</script>
+  <style>
+    /* Accessibility: High-contrast focus outline for keyboard navigation */
+    *:focus {
+      outline: 2px solid #818cf8 !important;
+      outline-offset: 2px !important;
+    }
 
-/* Scanner sci-fi frame */
-.scanner-frame{position:relative;overflow:hidden}
-.scan-laser{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(34,197,94,.95),rgba(6,182,212,.7),rgba(34,197,94,.95),transparent);filter:drop-shadow(0 0 8px rgba(34,197,94,.9));display:none;z-index:25}
-.corner-tl,.corner-tr,.corner-bl,.corner-br{position:absolute;width:28px;height:28px;z-index:26;transition:all .3s}
-.corner-tl{top:8px;left:8px;border-top:3px solid #22c55e;border-left:3px solid #22c55e}
-.corner-tr{top:8px;right:8px;border-top:3px solid #22c55e;border-right:3px solid #22c55e}
-.corner-bl{bottom:40px;left:8px;border-bottom:3px solid #22c55e;border-left:3px solid #22c55e}
-.corner-br{bottom:40px;right:8px;border-bottom:3px solid #22c55e;border-right:3px solid #22c55e}
-.corner-tl,.corner-tr,.corner-bl,.corner-br{box-shadow:0 0 12px rgba(34,197,94,.5);animation:cpulse 2s ease-in-out infinite}
-@keyframes cpulse{0%,100%{opacity:1;box-shadow:0 0 12px rgba(34,197,94,.5)}50%{opacity:.5;box-shadow:0 0 4px rgba(34,197,94,.2)}}
+    .skip-nav:focus {
+      position: fixed;
+      left: 20px;
+      top: 20px;
+      width: auto !important;
+      height: auto !important;
+      padding: 10px 20px !important;
+      background: #818cf8 !important;
+      color: white !important;
+      z-index: 9999999;
+      border-radius: 8px;
+      clip: auto !important;
+      clip-path: none !important;
+    }
 
-/* Matrix-style log stream */
-.log-row{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:10px;border-left:2px solid transparent;animation:logEntry .3s ease}
-.log-row.ok{border-left-color:#22c55e;background:rgba(34,197,94,.06)}
-.log-row.fail{border-left-color:#ef4444;background:rgba(239,68,68,.06)}
+    body {
+      background: radial-gradient(ellipse at top, #0a0620 0%, #020010 55%)
+    }
 
-/* Ring SVG glow */
-.ring-svg{filter:drop-shadow(0 0 8px rgba(99,102,241,.5))}
+    /* Scanner sci-fi frame */
+    .scanner-frame {
+      position: relative;
+      overflow: hidden
+    }
 
-/* Status indicators */
-.status-open{background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.35)}
-.status-busy{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35)}
-.status-full{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.35)}
-.status-closed{background:rgba(107,114,128,.1);border-color:rgba(107,114,128,.3)}
-</style>
+    .scan-laser {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(34, 197, 94, .95), rgba(6, 182, 212, .7), rgba(34, 197, 94, .95), transparent);
+      filter: drop-shadow(0 0 8px rgba(34, 197, 94, .9));
+      display: none;
+      z-index: 25
+    }
+
+    .corner-tl,
+    .corner-tr,
+    .corner-bl,
+    .corner-br {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      z-index: 26;
+      transition: all .3s
+    }
+
+    .corner-tl {
+      top: 8px;
+      left: 8px;
+      border-top: 3px solid #22c55e;
+      border-left: 3px solid #22c55e
+    }
+
+    .corner-tr {
+      top: 8px;
+      right: 8px;
+      border-top: 3px solid #22c55e;
+      border-right: 3px solid #22c55e
+    }
+
+    .corner-bl {
+      bottom: 40px;
+      left: 8px;
+      border-bottom: 3px solid #22c55e;
+      border-left: 3px solid #22c55e
+    }
+
+    .corner-br {
+      bottom: 40px;
+      right: 8px;
+      border-bottom: 3px solid #22c55e;
+      border-right: 3px solid #22c55e
+    }
+
+    .corner-tl,
+    .corner-tr,
+    .corner-bl,
+    .corner-br {
+      box-shadow: 0 0 12px rgba(34, 197, 94, .5);
+      animation: cpulse 2s ease-in-out infinite
+    }
+
+    @keyframes cpulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 12px rgba(34, 197, 94, .5)
+      }
+
+      50% {
+        opacity: .5;
+        box-shadow: 0 0 4px rgba(34, 197, 94, .2)
+      }
+    }
+
+    /* Matrix-style log stream */
+    .log-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      border-left: 2px solid transparent;
+      animation: logEntry .3s ease
+    }
+
+    .log-row.ok {
+      border-left-color: #22c55e;
+      background: rgba(34, 197, 94, .06)
+    }
+
+    .log-row.fail {
+      border-left-color: #ef4444;
+      background: rgba(239, 68, 68, .06)
+    }
+
+    /* Ring SVG glow */
+    .ring-svg {
+      filter: drop-shadow(0 0 8px rgba(99, 102, 241, .5))
+    }
+
+    /* Status indicators */
+    .status-open {
+      background: rgba(34, 197, 94, .1);
+      border-color: rgba(34, 197, 94, .35)
+    }
+
+    .status-busy {
+      background: rgba(245, 158, 11, .1);
+      border-color: rgba(245, 158, 11, .35)
+    }
+
+    .status-full {
+      background: rgba(239, 68, 68, .1);
+      border-color: rgba(239, 68, 68, .35)
+    }
+
+    .status-closed {
+      background: rgba(107, 114, 128, .1);
+      border-color: rgba(107, 114, 128, .3)
+    }
+  </style>
 </head>
+
 <body class="text-white min-h-screen flex flex-col font-sans">
+  <a class="skip-nav" href="#main-content">Skip to scanner control panel</a>
 
-<!-- Ambient orbs -->
-<div class="orb-ambient" style="width:500px;height:500px;top:-120px;left:-120px;background:radial-gradient(circle,rgba(234,179,8,.07),transparent 70%)"></div>
-<div class="orb-ambient" style="width:400px;height:400px;bottom:5%;right:-80px;background:radial-gradient(circle,rgba(99,102,241,.06),transparent 70%)"></div>
-
-<!-- Alert Banner -->
-<div id="alert-banner" class="alert-banner">
-  <span class="animate-bounce text-xl" id="alert-icon">⚠️</span>
-  <span id="alert-msg" class="text-sm"></span>
-  <button onclick="gsap.to('#alert-banner',{y:'-100%',duration:.5})" class="ml-3 text-white/50 text-xs border border-white/20 px-2 py-1 rounded">✕</button>
-</div>
-
-<!-- NAV -->
-<header class="sticky top-0 z-50 glass-bright border-b border-yellow-500/20 px-5 py-3 flex items-center justify-between" role="banner">
-  <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0" style="background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 0 25px rgba(245,158,11,.4)">🧑</div>
-    <div>
-      <p class="font-orb text-sm font-black tracking-wider gt-gold">STAFF TERMINAL</p>
-      <p class="text-[9px] font-mono" style="color:rgba(245,158,11,.6)">{{ gate.name }} · {{ email }}</p>
-    </div>
+  <!-- Ambient orbs -->
+  <div class="orb-ambient"
+    style="width:500px;height:500px;top:-120px;left:-120px;background:radial-gradient(circle,rgba(234,179,8,.07),transparent 70%)">
   </div>
-  <div class="flex items-center gap-2">
-    <div id="gate-status-badge" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest status-open transition-all duration-500" role="status">
-      <span id="gate-status-dot" class="w-1.5 h-1.5 rounded-full pulse" style="background:#22c55e" aria-hidden="true"></span>
-      <span id="gate-status-text" style="color:#22c55e">Open</span>
-    </div>
-    <a href="/logout" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border" style="color:#ef4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)" aria-label="Sign out">Logout</a>
+  <div class="orb-ambient"
+    style="width:400px;height:400px;bottom:5%;right:-80px;background:radial-gradient(circle,rgba(99,102,241,.06),transparent 70%)">
   </div>
-</header>
 
-<main class="flex-grow p-4 md:p-5 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
-      data-gate-id="{{ gate.id or 0 }}"
-      data-gate-name="{{ gate.name | escape }}"
-      data-gate-current="{{ gate.current or 0 }}"
-      data-gate-capacity="{{ gate.capacity or 1 }}">
+  <!-- Alert Banner -->
+  <div id="alert-banner" class="alert-banner">
+    <span class="animate-bounce text-xl" id="alert-icon">⚠️</span>
+    <span id="alert-msg" class="text-sm"></span>
+    <button onclick="gsap.to('#alert-banner',{y:'-100%',duration:.5})"
+      class="ml-3 text-white/50 text-xs border border-white/20 px-2 py-1 rounded">✕</button>
+  </div>
 
-  <!-- LEFT: Ring + Scanner -->
-  <div class="flex flex-col gap-4">
+  <!-- NAV -->
+  <header
+    class="sticky top-0 z-50 glass-bright border-b border-yellow-500/20 px-5 py-3 flex items-center justify-between"
+    role="banner">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
+        style="background:linear-gradient(135deg,#f59e0b,#f97316);box-shadow:0 0 25px rgba(245,158,11,.4)">🧑</div>
+      <div>
+        <p class="font-orb text-sm font-black tracking-wider gt-gold">STAFF TERMINAL</p>
+        <p class="text-[9px] font-mono" style="color:rgba(245,158,11,.6)">{{ gate.name }} · {{ email }}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4" role="navigation" aria-label="Google Global Services">
+      <!-- Google Translate Container -->
+      <div id="google_translate_element" class="relative z-[1000]"></div>
+      <script type="text/javascript">
+        function googleTranslateElementInit() { new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element'); }
+      </script>
+      <script type="text/javascript"
+        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-    <!-- Capacity Ring (3D-ish SVG glow) -->
-    <div class="cap-card glass rounded-2xl p-6 border border-yellow-500/15 relative overflow-hidden card-3d">
-      <!-- Gradient top bar -->
-      <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,#f59e0b,#f97316,#ef4444,#8b5cf6)"></div>
+      <div id="gate-status-badge"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest status-open transition-all duration-500"
+        role="status">
+        <span id="gate-status-dot" class="w-1.5 h-1.5 rounded-full pulse" style="background:#22c55e"
+          aria-hidden="true"></span>
+        <span id="gate-status-text" style="color:#22c55e">Open</span>
+      </div>
+      <a href="/logout" class="text-[9px] uppercase font-black px-3 py-1.5 rounded-xl border"
+        style="color:#ef4444;background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)"
+        aria-label="Sign out">Logout</a>
+    </div>
+  </header>
 
-      <p class="font-orb text-[9px] font-black tracking-[.2em] mb-4 uppercase" style="color:rgba(255,255,255,.5)">{{ gate.name }} · OCCUPANCY SENSOR</p>
+  <main class="flex-grow p-4 md:p-5 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch"
+    id="main-content" role="main" data-gate-id="{{ gate.id or 0 }}" data-gate-name="{{ gate.name | escape }}"
+    data-gate-current="{{ gate.current or 0 }}" data-gate-capacity="{{ gate.capacity or 1 }}">
 
-      <div class="flex items-center gap-6">
-        <!-- Glowing SVG ring -->
-        <div class="relative w-32 h-32 shrink-0">
-          <svg class="w-32 h-32 ring-svg" viewBox="0 0 128 128" style="transform:rotate(-90deg)">
-            <defs>
-              <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f59e0b"/>
-                <stop offset="50%" stop-color="#f97316"/>
-                <stop offset="100%" stop-color="#8b5cf6"/>
-              </linearGradient>
-              <filter id="gf"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-            </defs>
-            <circle cx="64" cy="64" r="52" fill="none" stroke="rgba(139,92,246,.06)" stroke-width="14"/>
-            <circle id="cap-ring" cx="64" cy="64" r="52" fill="none" stroke="url(#rg)" stroke-width="14"
-                    stroke-dasharray="326.7" stroke-dashoffset="326.7" stroke-linecap="round" filter="url(#gf)" class="transition-all duration-1000"/>
-          </svg>
-          <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span id="gate-count" class="text-4xl font-black font-orb text-white">{{ gate.current }}</span>
-            <span class="text-[9px] font-mono mt-0.5" style="color:rgba(245,158,11,.5)">/ {{ gate.capacity }}</span>
-          </div>
-        </div>
+    <!-- LEFT: Ring + Scanner -->
+    <div class="flex flex-col gap-4">
 
-        <!-- Stats -->
-        <div class="flex-grow space-y-3">
-          <div>
-            <div class="flex justify-between text-[9px] font-mono mb-1.5 font-bold uppercase">
-              <span style="color:rgba(255,255,255,.5)">Fill Rate</span>
-              <span id="capacity-pct" class="gt-gold">{{ (gate.current / gate.capacity * 100)|int }}%</span>
+      <!-- Capacity Ring (3D-ish SVG glow) -->
+      <div class="cap-card glass rounded-2xl p-6 border border-yellow-500/15 relative overflow-hidden card-3d">
+        <!-- Gradient top bar -->
+        <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
+          style="background:linear-gradient(90deg,#f59e0b,#f97316,#ef4444,#8b5cf6)"></div>
+
+        <p class="font-orb text-[9px] font-black tracking-[.2em] mb-4 uppercase" style="color:rgba(255,255,255,.5)">{{
+          gate.name }} · OCCUPANCY SENSOR</p>
+
+        <div class="flex items-center gap-6">
+          <!-- Glowing SVG ring -->
+          <div class="relative w-32 h-32 shrink-0">
+            <svg class="w-32 h-32 ring-svg" viewBox="0 0 128 128" style="transform:rotate(-90deg)">
+              <defs>
+                <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f59e0b" />
+                  <stop offset="50%" stop-color="#f97316" />
+                  <stop offset="100%" stop-color="#8b5cf6" />
+                </linearGradient>
+                <filter id="gf">
+                  <feGaussianBlur stdDeviation="3" result="b" />
+                  <feMerge>
+                    <feMergeNode in="b" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <circle cx="64" cy="64" r="52" fill="none" stroke="rgba(139,92,246,.06)" stroke-width="14" />
+              <circle id="cap-ring" cx="64" cy="64" r="52" fill="none" stroke="url(#rg)" stroke-width="14"
+                stroke-dasharray="326.7" stroke-dashoffset="326.7" stroke-linecap="round" filter="url(#gf)"
+                class="transition-all duration-1000" />
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span id="gate-count" class="text-4xl font-black font-orb text-white">{{ gate.current }}</span>
+              <span class="text-[9px] font-mono mt-0.5" style="color:rgba(245,158,11,.5)">/ {{ gate.capacity }}</span>
             </div>
-            <div class="relative h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,.04)">
-              <div id="capacity-bar" class="absolute left-0 top-0 h-full rounded-full transition-all duration-1000" style="background:linear-gradient(90deg,#f59e0b,#f97316,#ef4444)"></div>
-            </div>
           </div>
+
+          <!-- Stats -->
+          <div class="flex-grow space-y-3">
+            <div>
+              <div class="flex justify-between text-[9px] font-mono mb-1.5 font-bold uppercase">
+                <span style="color:rgba(255,255,255,.5)">Fill Rate</span>
+                <span id="capacity-pct" class="gt-gold">{{ (gate.current / gate.capacity * 100)|int }}%</span>
+              </div>
+              <div class="relative h-2 rounded-full overflow-hidden" style="background:rgba(255,255,255,.04)">
+                <div id="capacity-bar" class="absolute left-0 top-0 h-full rounded-full transition-all duration-1000"
+                  style="background:linear-gradient(90deg,#f59e0b,#f97316,#ef4444)"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    </div>
 
     <!-- AI Sector Advisory — Repositioned for visibility -->
-    <div class="glass rounded-2xl border border-indigo-500/30 p-5 relative overflow-hidden mb-4 shrink-0" style="background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(34,197,94,.05))">
-      <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full" style="background:radial-gradient(circle,rgba(34,197,94,.15),transparent 70%)"></div>
+    <div class="glass rounded-2xl border border-indigo-500/30 p-5 relative overflow-hidden mb-4"
+      style="background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(34,197,94,.05))">
+      <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full"
+        style="background:radial-gradient(circle,rgba(34,197,94,.15),transparent 70%)"></div>
       <h3 class="font-orb text-[9px] font-black uppercase text-indigo-400 mb-2 flex items-center gap-1.5">
         <span class="animate-pulse">✨</span> GEMINI OPERATOR ADVISORY
       </h3>
@@ -143,22 +327,36 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
     <!-- QR Scanner: Sci-fi frame -->
     <div class="scanner-frame flex-grow glass rounded-2xl border border-green-500/15 relative" style="min-height:300px">
       <!-- Gradient bar -->
-      <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl z-30" style="background:linear-gradient(90deg,#22c55e,#06b6d4,#22c55e)"></div>
+      <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl z-30"
+        style="background:linear-gradient(90deg,#22c55e,#06b6d4,#22c55e)"></div>
 
       <!-- Brackets -->
-      <div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>
+      <div class="corner-tl"></div>
+      <div class="corner-tr"></div>
+      <div class="corner-bl"></div>
+      <div class="corner-br"></div>
 
       <!-- Init overlay -->
-      <div id="scanner-overlay" class="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5 cursor-pointer rounded-2xl transition-all" onclick="activateScanner()" style="background:rgba(2,0,16,.9);backdrop-filter:blur(10px)">
+      <div id="scanner-overlay"
+        class="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5 cursor-pointer rounded-2xl transition-all"
+        onclick="activateScanner()" style="background:rgba(2,0,16,.9);backdrop-filter:blur(10px)">
         <div class="relative float">
-          <div class="w-24 h-24 rounded-2xl flex items-center justify-center" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);box-shadow:0 0 40px rgba(34,197,94,.2)">
+          <div class="w-24 h-24 rounded-2xl flex items-center justify-center"
+            style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);box-shadow:0 0 40px rgba(34,197,94,.2)">
             <svg class="w-12 h-12" style="color:#22c55e" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <div class="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center pulse" style="background:#22c55e">
-            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          <div class="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center pulse"
+            style="background:#22c55e">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd" />
+            </svg>
           </div>
         </div>
         <div class="text-center">
@@ -171,339 +369,361 @@ body{background:radial-gradient(ellipse at top,#0a0620 0%,#020010 55%)}
       <div id="scan-laser" class="scan-laser"></div>
 
       <!-- Stop Camera button — only shown when camera is active -->
-      <button id="stop-cam-btn"
-        onclick="stopScanner()"
-        style="display:none;position:absolute;top:12px;right:12px;z-index:40;
+      <button id="stop-cam-btn" onclick="stopScanner()" style="display:none;position:absolute;top:12px;right:12px;z-index:40;
                background:rgba(239,68,68,.18);border:1.5px solid rgba(239,68,68,.5);
                color:#f87171;font-family:'JetBrains Mono',monospace;font-size:9px;
                font-weight:900;letter-spacing:.1em;text-transform:uppercase;
                padding:6px 12px;border-radius:8px;cursor:pointer;
-               backdrop-filter:blur(10px);transition:all .2s"
-        onmouseover="this.style.background='rgba(239,68,68,.35)'"
+               backdrop-filter:blur(10px);transition:all .2s" onmouseover="this.style.background='rgba(239,68,68,.35)'"
         onmouseout="this.style.background='rgba(239,68,68,.18)'">
         ⏹ STOP CAM
       </button>
 
-      <div class="absolute bottom-0 left-0 right-0 p-4 z-20 text-center scanlines" style="background:linear-gradient(to top,rgba(2,0,16,.95),transparent)">
-        <div id="scan-result" class="text-[10px] font-bold uppercase font-mono tracking-widest" style="color:rgba(99,102,241,.65)">CAMERA INACTIVE</div>
+      <div class="absolute bottom-0 left-0 right-0 p-4 z-20 text-center scanlines"
+        style="background:linear-gradient(to top,rgba(2,0,16,.95),transparent)">
+        <div id="scan-result" class="text-[10px] font-bold uppercase font-mono tracking-widest"
+          style="color:rgba(99,102,241,.65)">CAMERA INACTIVE</div>
       </div>
     </div>
-  </div>
-
-  <!-- RIGHT: Status + Matrix Log -->
-  <div class="flex flex-col gap-4">
-
-    <!-- Session Stats Bar -->
-    <div class="grid grid-cols-4 gap-2 mb-3">
-      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
-        <p class="font-orb text-xl font-black" style="color:#22c55e" id="s-ok">0</p>
-        <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Granted</p>
-      </div>
-      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
-        <p class="font-orb text-xl font-black" style="color:#ef4444" id="s-fail">0</p>
-        <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Denied</p>
-      </div>
-      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
-        <p class="font-orb text-xl font-black" style="color:#f59e0b" id="s-pend">0</p>
-        <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Pending</p>
-      </div>
-      <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
-        <p class="font-orb text-lg font-black text-white" id="s-shift">00:00</p>
-        <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Shift</p>
-      </div>
     </div>
 
-    <!-- Pending Arrivals Panel (shows on user_registered WS event) -->
-    <div id="pending-panel" class="glass rounded-2xl border border-yellow-500/20 overflow-hidden" style="display:none;max-height:190px">
-      <div class="flex justify-between items-center px-4 py-3 border-b border-yellow-500/10">
-        <h4 class="font-orb text-[9px] font-black tracking-wider" style="color:#f59e0b">🔔 PENDING ARRIVALS</h4>
-        <span id="pending-count" class="font-orb text-[8px] font-black px-2 py-0.5 rounded-full" style="background:rgba(245,158,11,.15);color:#f59e0b">0</span>
-      </div>
-      <div id="pending-list" class="overflow-y-auto px-3 py-2 space-y-1" style="max-height:130px"></div>
-    </div>
+    <!-- RIGHT: Status + Matrix Log -->
+    <div class="flex flex-col gap-4">
 
-    <!-- Mini stats -->
-    <div class="grid grid-cols-3 gap-3">
-      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
-        <p class="text-2xl font-black font-orb text-white" id="s1">0</p>
-        <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Scanned</p>
+      <!-- Session Stats Bar -->
+      <div class="grid grid-cols-4 gap-2 mb-3">
+        <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
+          <p class="font-orb text-xl font-black" style="color:#22c55e" id="s-ok">0</p>
+          <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Granted</p>
+        </div>
+        <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
+          <p class="font-orb text-xl font-black" style="color:#ef4444" id="s-fail">0</p>
+          <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Denied</p>
+        </div>
+        <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
+          <p class="font-orb text-xl font-black" style="color:#f59e0b" id="s-pend">0</p>
+          <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Pending</p>
+        </div>
+        <div class="stat-s glass rounded-xl p-3 text-center border border-yellow-500/10 card-3d">
+          <p class="font-orb text-lg font-black text-white" id="s-shift">00:00</p>
+          <p class="text-[7px] font-bold uppercase mt-0.5" style="color:rgba(255,255,255,.5)">Shift</p>
+        </div>
       </div>
-      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
-        <p class="text-2xl font-black font-orb" style="color:#22c55e" id="s2">{{ gate.capacity - gate.current }}</p>
-        <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Available</p>
-      </div>
-      <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
-        <p class="text-lg font-black font-orb uppercase" id="gate-status-sm" style="color:#22c55e">{{ (gate.status or 'Open')|capitalize }}</p>
-        <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Status</p>
-      </div>
-    </div>
 
-    <!-- Matrix-style Entry Stream -->
-    <div class="reg-card flex-grow glass rounded-2xl border border-indigo-500/15 flex flex-col" style="max-height:55vh;position:relative" role="region" aria-label="Live Entry Stream">
-      <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl" style="background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899)"></div>
-      <div class="flex items-center justify-between p-5 pb-3 shrink-0">
-        <h3 class="font-orb text-xs font-black tracking-wider gt-purple">📋 ENTRY DATA STREAM</h3>
-        <span class="text-[8px] font-bold uppercase font-mono px-2 py-1 rounded-full border" style="color:#8b5cf6;background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.25)" id="scan-count-badge" role="status">0 RECORDS</span>
+      <!-- Pending Arrivals Panel (shows on user_registered WS event) -->
+      <div id="pending-panel" class="glass rounded-2xl border border-yellow-500/20 overflow-hidden"
+        style="display:none;max-height:190px">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-yellow-500/10">
+          <h4 class="font-orb text-[9px] font-black tracking-wider" style="color:#f59e0b">🔔 PENDING ARRIVALS</h4>
+          <span id="pending-count" class="font-orb text-[8px] font-black px-2 py-0.5 rounded-full"
+            style="background:rgba(245,158,11,.15);color:#f59e0b">0</span>
+        </div>
+        <div id="pending-list" class="overflow-y-auto px-3 py-2 space-y-1" style="max-height:130px"></div>
       </div>
-      <div class="flex-grow overflow-y-auto px-4 pb-4 space-y-1.5 pr-3" id="entry-list" role="log" aria-live="polite">
-        <div class="text-center py-10" id="empty-state">
-          <div class="text-3xl mb-2" aria-hidden="true">📟</div>
-          <p class="text-[9px] uppercase font-bold tracking-widest font-mono" style="color:rgba(255,255,255,.3)">AWAITING SCAN DATA...</p>
+
+      <!-- Mini stats -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
+          <p class="text-2xl font-black font-orb text-white" id="s1">0</p>
+          <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Scanned</p>
+        </div>
+        <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
+          <p class="text-2xl font-black font-orb" style="color:#22c55e" id="s2">{{ gate.capacity - gate.current }}</p>
+          <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Available</p>
+        </div>
+        <div class="stat-c glass rounded-xl p-4 text-center border border-indigo-500/10 card-3d">
+          <p class="text-lg font-black font-orb uppercase" id="gate-status-sm" style="color:#22c55e">{{ (gate.status or
+            'Open')|capitalize }}</p>
+          <p class="text-[8px] font-bold uppercase mt-1" style="color:rgba(255,255,255,.5)">Status</p>
+        </div>
+      </div>
+
+      <!-- Matrix-style Entry Stream (Accessibility Log) -->
+      <div class="reg-card flex-grow glass rounded-2xl border border-indigo-500/15 flex flex-col"
+        style="max-height:55vh;position:relative" role="main" aria-label="Live Entry Stream">
+        <div class="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl"
+          style="background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899)"></div>
+        <div class="flex items-center justify-between p-5 pb-3 shrink-0">
+          <h3 class="font-orb text-xs font-black tracking-wider gt-purple">📋 ENTRY DATA STREAM</h3>
+          <span class="text-[8px] font-bold uppercase font-mono px-2 py-1 rounded-full border"
+            style="color:#8b5cf6;background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.25)"
+            id="scan-count-badge" role="status">0 RECORDS</span>
+        </div>
+        <div class="flex-grow overflow-y-auto px-4 pb-4 space-y-1.5 pr-3" id="entry-list" role="log" aria-live="polite">
+          <div class="text-center py-10" id="empty-state">
+            <div class="text-3xl mb-2" aria-hidden="true">📟</div>
+            <p class="text-[9px] uppercase font-bold tracking-widest font-mono" style="color:rgba(255,255,255,.3)">
+              AWAITING SCAN DATA...</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<footer class="relative z-10 border-t border-yellow-500/10 py-4 px-5" style="background:rgba(3,2,12,.85);backdrop-filter:blur(20px)">
-  <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
-    <div class="flex items-center gap-2">
-      <div class="w-6 h-6 rounded-lg flex items-center justify-center" style="background:linear-gradient(135deg,#f59e0b,#f97316)">🧑</div>
-      <span class="font-orb text-xs font-black gt-gold">VenueFlow AI · Staff Terminal</span>
+  <footer class="relative z-10 border-t border-yellow-500/10 py-4 px-5"
+    style="background:rgba(3,2,12,.85);backdrop-filter:blur(20px)">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded-lg flex items-center justify-center"
+          style="background:linear-gradient(135deg,#f59e0b,#f97316)">🧑</div>
+        <span class="font-orb text-xs font-black gt-gold">VenueFlow AI · Staff Terminal</span>
+      </div>
+      <div class="flex gap-4">
+        <span class="text-[9px] font-mono" style="color:rgba(255,255,255,.5)">{{ gate.name }} · OPERATOR</span>
+        <span class="text-[9px] font-mono" style="color:rgba(255,255,255,.5)">{{ email }}</span>
+        <span class="text-[9px] font-mono" style="color:rgba(255,255,255,.4)">IPL 2026 · CAP {{ gate.capacity }}</span>
+      </div>
     </div>
-    <div class="flex gap-4">
-      <span class="text-[9px] font-mono" style="color:rgba(255,255,255,.5)">{{ gate.name }} · OPERATOR</span>
-      <span class="text-[9px] font-mono" style="color:rgba(255,255,255,.5)">{{ email }}</span>
-      <span class="text-[9px] font-mono" style="color:rgba(255,255,255,.4)">IPL 2026 · CAP {{ gate.capacity }}</span>
-    </div>
-  </div>
-</footer>
+  </footer>
 
-<script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
-<script>
-/* ── Audio ────────────────────────────────────────────────────── */
-function playBeep(f,d,t='sine'){try{const ac=new(AudioContext||webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=t;o.frequency.value=f;g.gain.setValueAtTime(.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d);}catch{}}
-function playScanSuccess(){playBeep(880,.1);setTimeout(()=>playBeep(1320,.15),120);}
-function playScanFail(){playBeep(180,.4,'sawtooth');}
+  <script src="{{ url_for('static', filename='js/websocket.js') }}"></script>
+  <script>
+    /* ── Audio ────────────────────────────────────────────────────── */
+    function playBeep(f, d, t = 'sine') { try { const ac = new (AudioContext || webkitAudioContext)(); const o = ac.createOscillator(); const g = ac.createGain(); o.connect(g); g.connect(ac.destination); o.type = t; o.frequency.value = f; g.gain.setValueAtTime(.05, ac.currentTime); g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + d); o.start(); o.stop(ac.currentTime + d); } catch { } }
+    function playScanSuccess() { playBeep(880, .1); setTimeout(() => playBeep(1320, .15), 120); }
+    function playScanFail() { playBeep(180, .4, 'sawtooth'); }
 
-/* ── Init ─────────────────────────────────────────────────────── */
-let grantedCount=0,deniedCount=0,pendingCount=0;
-const shiftStart=Date.now();
+    /* ── Init ─────────────────────────────────────────────────────── */
+    let grantedCount = 0, deniedCount = 0, pendingCount = 0;
+    const shiftStart = Date.now();
 
-document.addEventListener('DOMContentLoaded',()=>{
-  if (window.gsap) {
-    try {
-      gsap.from('.cap-card', {opacity:0,y:24,duration:1,ease:'expo.out',delay:.1});
-      gsap.from('.scanner-frame',{opacity:0,y:30,duration:1,ease:'expo.out',delay:.2});
-      gsap.from('.stat-s',{opacity:0,y:16,duration:.7,ease:'back.out(1.4)',stagger:.05,delay:.22});
-      gsap.from('.stat-c',{opacity:0,y:20,duration:.7,ease:'back.out(1.4)',stagger:.07,delay:.35});
-      gsap.from('.reg-card',{opacity:0,y:30,duration:1,ease:'expo.out',delay:.4});
-    } catch(e) {}
-  }
-
-  // Shift timer (counts up)
-  setInterval(()=>{
-    const e=Math.floor((Date.now()-shiftStart)/1000);
-    const m=Math.floor(e/60),s=e%60;
-    const el=document.getElementById('s-shift');
-    if(el)el.innerText=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  },1000);
-
-  // Session heartbeat — keeps login cookie alive during long shifts
-  setInterval(()=>fetch('/api/heartbeat',{credentials:'same-origin'}),4*60*1000);
-
-  // Initial UI state
-  const mainEl = document.querySelector('main');
-  const gateId = mainEl.dataset.gateId;
-  const gateName = mainEl.dataset.gateName;
-  const gateCurrent = parseInt(mainEl.dataset.gateCurrent);
-  const gateCapacity = parseInt(mainEl.dataset.gateCapacity);
-
-  const initFill = Math.min(100, Math.floor((gateCurrent / (gateCapacity || 1)) * 100));
-  const bar = document.getElementById('capacity-bar');
-  if(bar) bar.style.width = initFill + '%';
-
-  initWebSockets('staff', gateName, gateId);
-});
-
-/* ── Pending Arrivals (user_registered WS event) ───────────── */
-function showPendingArrival(data){
-  const panel=document.getElementById('pending-panel');
-  const list=document.getElementById('pending-list');
-  const badge=document.getElementById('pending-count');
-  // Show panel with slide-down
-  if(panel.style.display==='none'){
-    panel.style.display='block';
-    gsap.from(panel,{y:-20,opacity:0,duration:.5,ease:'back.out(1.5)'});
-  }
-  pendingCount++;
-  if(badge)badge.innerText=pendingCount;
-  const el=document.getElementById('s-pend');
-  if(el)gsap.to({v:parseInt(el.innerText)||0},{v:pendingCount,duration:.5,ease:'expo.out',onUpdate:function(){el.innerText=Math.floor(this.targets()[0].v);}});
-  const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  const row=document.createElement('div');
-  row.style.cssText='display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:8px;background:rgba(245,158,11,.07);border-left:2px solid rgba(245,158,11,.4);font-family:JetBrains Mono,monospace;font-size:9px;margin-bottom:4px';
-  row.innerHTML=`<span style="color:#f59e0b;font-weight:900">[NEW]</span><span style="color:#fbbf24;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${data.name||data.email}</span><span style="color:#374151">${time}</span>`;
-  list.prepend(row);
-  gsap.from(row,{x:-12,opacity:0,duration:.4,ease:'power3.out'});
-  // Pulse the pending stat
-  const pEl=document.getElementById('s-pend');
-  if(pEl)gsap.fromTo(pEl.parentElement,{boxShadow:'0 0 20px rgba(245,158,11,.6)'},{boxShadow:'0 0 0 rgba(0,0,0,0)',duration:1.5});
-  // Play arrival chime
-  try{const ac=new(AudioContext||webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sine';o.frequency.value=660;g.gain.setValueAtTime(.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.3);o.start();o.stop(ac.currentTime+.3);}catch{}
-}
-window.onUserRegistered=showPendingArrival;
-
-/* ── Scanner ─────────────────────────────────────────────────── */
-let scannerActive=false,cooldown=false,scanCount=0;
-const scannedSet=new Set();
-let _mediaStream=null;   // track stream so we can stop it
-
-function activateScanner(){
-  if(scannerActive)return;
-  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}})
-    .then(stream=>{
-      _mediaStream=stream;
-      scannerActive=true;
-      document.getElementById('scan-video').srcObject=stream;
-      gsap.to('#scanner-overlay',{opacity:0,duration:.5,onComplete:()=>document.getElementById('scanner-overlay').style.display='none'});
-      // Show stop button
-      const stopBtn=document.getElementById('stop-cam-btn');
-      if(stopBtn){stopBtn.style.display='block';gsap.from(stopBtn,{opacity:0,scale:.8,duration:.3,ease:'back.out(2)'}); }
-      const laser=document.getElementById('scan-laser');
-      laser.style.display='block';
-      gsap.to(laser,{top:'80%',duration:2,repeat:-1,yoyo:true,ease:'sine.inOut'});
-      setRes('<span style="color:#22c55e;font-weight:900">SCANNER ACTIVE · ALIGN QR CODE</span>');
-      try{
-        const reader=new ZXing.BrowserQRCodeReader();
-        reader.decodeFromStream(stream,document.getElementById('scan-video'),(res,err)=>{
-          if(!res||cooldown)return;
-          const text=res.getText();
-          if(scannedSet.has(text))return;
-          cooldown=true;setTimeout(()=>{cooldown=false;},3000);
-          processQR(text);
-        });
-      }catch(e){setRes('<span style="color:#ef4444">ZXING DECODE ERROR</span>');}
-    })
-    .catch(err=>setRes(`<span style="color:#ef4444">CAM ERR: ${err.message}</span>`));
-}
-
-function stopScanner(){
-  scannerActive=false;
-  cooldown=false;
-  if(_mediaStream){
-    _mediaStream.getTracks().forEach(t=>t.stop());
-    _mediaStream=null;
-  }
-  const vid=document.getElementById('scan-video');
-  if(vid)vid.srcObject=null;
-  const laser=document.getElementById('scan-laser');
-  if(laser){laser.style.display='none';gsap.killTweensOf(laser);}
-  // Hide stop button, show overlay again
-  const stopBtn=document.getElementById('stop-cam-btn');
-  if(stopBtn)stopBtn.style.display='none';
-  const overlay=document.getElementById('scanner-overlay');
-  if(overlay){overlay.style.display='flex';gsap.to(overlay,{opacity:1,duration:.5});}
-  setRes('<span style="color:rgba(99,102,241,.65)">CAMERA INACTIVE</span>');
-}
-
-function setRes(html){document.getElementById('scan-result').innerHTML=html;}
-
-function processQR(text){
-  if(navigator.vibrate)navigator.vibrate([60,40,60]);
-  setRes('<span style="color:#06b6d4;font-weight:900" class="animate-pulse">⚡ VERIFYING ID...</span>');
-  fetch('/scan_qr',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({qr_data:text})})
-    .then(r=>r.json()).then(data=>{
-      const ok=data.status==='success';
-      if(ok){
-        scannedSet.add(text);
-        playScanSuccess();
-        const matchDone = data.match_past;
-        const displayName = (data.user_data && data.user_data.name) ? data.user_data.name : (data.user || text);
-        const lbl = matchDone ? `⚠️ MATCH PAST: ${displayName}` : `✓ GRANTED: ${displayName}`;
-        setRes(`<span style="color:${matchDone?'#f59e0b':'#22c55e'};font-weight:900">${lbl}</span>`);
-        gsap.fromTo('.scanner-frame',{boxShadow:`0 0 80px rgba(${matchDone?'245,158,11':'34,197,94'},.6)`},{boxShadow:'0 0 0 rgba(0,0,0,0)',duration:2});
-        grantedCount++;
-        scanCount=grantedCount;
-        // Note: 'today-scans' element doesn't exist; use s1 instead
-        const s1el=document.getElementById('s1'); if(s1el)s1el.innerText=scanCount;
-        const sokEl=document.getElementById('s-ok'); if(sokEl)sokEl.innerText=grantedCount;
-        const badge=document.getElementById('scan-count-badge'); if(badge)badge.innerText=`${scanCount} RECORDS`;
-        addEntry(displayName,'ok',text,data);
-      }else{
-        playScanFail();
-        setRes(`<span style="color:#ef4444;font-weight:900">✗ DENIED: ${data.message}</span>`);
-        gsap.fromTo('.scanner-frame',{x:-6},{x:6,yoyo:true,repeat:5,duration:.05,ease:'power1.inOut'});
-        if(navigator.vibrate)navigator.vibrate([200,100,200]);
-        deniedCount++;
-        document.getElementById('s-fail').innerText=deniedCount;
-        addEntry(text.substring(0,30),'fail',text,data);
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.gsap) {
+        try {
+          gsap.from('.cap-card', { opacity: 0, y: 24, duration: 1, ease: 'expo.out', delay: .1 });
+          gsap.from('.scanner-frame', { opacity: 0, y: 30, duration: 1, ease: 'expo.out', delay: .2 });
+          gsap.from('.stat-s', { opacity: 0, y: 16, duration: .7, ease: 'back.out(1.4)', stagger: .05, delay: .22 });
+          gsap.from('.stat-c', { opacity: 0, y: 20, duration: .7, ease: 'back.out(1.4)', stagger: .07, delay: .35 });
+          gsap.from('.reg-card', { opacity: 0, y: 30, duration: 1, ease: 'expo.out', delay: .4 });
+        } catch (e) { }
       }
-      setTimeout(()=>{if(scannerActive)setRes('<span style="color:#22c55e;font-weight:900">SCANNER ACTIVE · ALIGN QR CODE</span>');},2500);
-    }).catch(()=>setRes('<span style="color:#ef4444">NETWORK ERROR</span>'));
-}
 
-let regData=false,entrySeq=0;
-function addEntry(label,status,rawText,apiData){
-  if(!regData){document.getElementById('empty-state')?.remove();regData=true;}
-  const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const ok=status==='ok';
-  const matchDone=apiData&&apiData.match_past;
-  const id='e'+(++entrySeq);
-  const div=document.createElement('div');
-  div.style.cssText='margin-bottom:4px;cursor:pointer';
-  div.innerHTML=`
-  <div class="log-row ${status}" id="${id}-row" onclick="toggleEntry('${id}')" style="cursor:pointer;user-select:none${matchDone?';border-left-color:#f59e0b':''}">
-    <span style="color:${ok?(matchDone?'#fbbf24':'#22c55e'):'#ef4444'};font-weight:900;font-size:11px;flex-shrink:0">${ok?(matchDone?'⚠️ PAST':'✓ OK'):'✗ DENY'}</span>
-    <span style="color:${ok?(matchDone?'#fde68a':'#4ade80'):'#f87171'};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">${label}</span>
+      // Shift timer (counts up)
+      setInterval(() => {
+        const e = Math.floor((Date.now() - shiftStart) / 1000);
+        const m = Math.floor(e / 60), s = e % 60;
+        const el = document.getElementById('s-shift');
+        if (el) el.innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }, 1000);
+
+      // Session heartbeat — keeps login cookie alive during long shifts
+      setInterval(() => fetch('/api/heartbeat', { credentials: 'same-origin' }), 4 * 60 * 1000);
+
+      // Initial UI state
+      const mainEl = document.querySelector('main');
+      const gateId = mainEl.dataset.gateId;
+      const gateName = mainEl.dataset.gateName;
+      const gateCurrent = parseInt(mainEl.dataset.gateCurrent);
+      const gateCapacity = parseInt(mainEl.dataset.gateCapacity);
+
+      const initFill = Math.min(100, Math.floor((gateCurrent / (gateCapacity || 1)) * 100));
+      const bar = document.getElementById('capacity-bar');
+      if (bar) bar.style.width = initFill + '%';
+
+      initWebSockets('staff', gateName, gateId);
+
+      function fetchStaffAI() {
+        fetch(`/api/ai_assist?page=StaffTerminal&message=Give me an operator tip for ${gateName}.`, { credentials: 'same-origin' })
+          .then(r => r.json()).then(d => {
+            if (d.response) {
+              const el = document.getElementById('ai-pro-tip');
+              gsap.to(el, { opacity: 0, duration: .3, onComplete: () => { el.innerText = d.response; gsap.to(el, { opacity: 1, duration: 1 }); } });
+            }
+          }).catch(() => { });
+      }
+      setTimeout(fetchStaffAI, 2500);
+      setInterval(fetchStaffAI, 45000);
+    });
+
+    /* ── Pending Arrivals (user_registered WS event) ───────────── */
+    function showPendingArrival(data) {
+      const panel = document.getElementById('pending-panel');
+      const list = document.getElementById('pending-list');
+      const badge = document.getElementById('pending-count');
+      // Show panel with slide-down
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        gsap.from(panel, { y: -20, opacity: 0, duration: .5, ease: 'back.out(1.5)' });
+      }
+      pendingCount++;
+      if (badge) badge.innerText = pendingCount;
+      const el = document.getElementById('s-pend');
+      if (el) gsap.to({ v: parseInt(el.innerText) || 0 }, { v: pendingCount, duration: .5, ease: 'expo.out', onUpdate: function () { el.innerText = Math.floor(this.targets()[0].v); } });
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:8px;background:rgba(245,158,11,.07);border-left:2px solid rgba(245,158,11,.4);font-family:JetBrains Mono,monospace;font-size:9px;margin-bottom:4px';
+      row.innerHTML = `<span style="color:#f59e0b;font-weight:900">[NEW]</span><span style="color:#fbbf24;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${data.name || data.email}</span><span style="color:#374151">${time}</span>`;
+      list.prepend(row);
+      gsap.from(row, { x: -12, opacity: 0, duration: .4, ease: 'power3.out' });
+      // Pulse the pending stat
+      const pEl = document.getElementById('s-pend');
+      if (pEl) gsap.fromTo(pEl.parentElement, { boxShadow: '0 0 20px rgba(245,158,11,.6)' }, { boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 1.5 });
+      // Play arrival chime
+      try { const ac = new (AudioContext || webkitAudioContext)(); const o = ac.createOscillator(); const g = ac.createGain(); o.connect(g); g.connect(ac.destination); o.type = 'sine'; o.frequency.value = 660; g.gain.setValueAtTime(.05, ac.currentTime); g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + .3); o.start(); o.stop(ac.currentTime + .3); } catch { }
+    }
+    window.onUserRegistered = showPendingArrival;
+
+    /* ── Scanner ─────────────────────────────────────────────────── */
+    let scannerActive = false, cooldown = false, scanCount = 0;
+    const scannedSet = new Set();
+    let _mediaStream = null;   // track stream so we can stop it
+
+    function activateScanner() {
+      if (scannerActive) return;
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } })
+        .then(stream => {
+          _mediaStream = stream;
+          scannerActive = true;
+          document.getElementById('scan-video').srcObject = stream;
+          gsap.to('#scanner-overlay', { opacity: 0, duration: .5, onComplete: () => document.getElementById('scanner-overlay').style.display = 'none' });
+          // Show stop button
+          const stopBtn = document.getElementById('stop-cam-btn');
+          if (stopBtn) { stopBtn.style.display = 'block'; gsap.from(stopBtn, { opacity: 0, scale: .8, duration: .3, ease: 'back.out(2)' }); }
+          const laser = document.getElementById('scan-laser');
+          laser.style.display = 'block';
+          gsap.to(laser, { top: '80%', duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut' });
+          setRes('<span style="color:#22c55e;font-weight:900">SCANNER ACTIVE · ALIGN QR CODE</span>');
+          try {
+            const reader = new ZXing.BrowserQRCodeReader();
+            reader.decodeFromStream(stream, document.getElementById('scan-video'), (res, err) => {
+              if (!res || cooldown) return;
+              const text = res.getText();
+              if (scannedSet.has(text)) return;
+              cooldown = true; setTimeout(() => { cooldown = false; }, 3000);
+              processQR(text);
+            });
+          } catch (e) { setRes('<span style="color:#ef4444">ZXING DECODE ERROR</span>'); }
+        })
+        .catch(err => setRes(`<span style="color:#ef4444">CAM ERR: ${err.message}</span>`));
+    }
+
+    function stopScanner() {
+      scannerActive = false;
+      cooldown = false;
+      if (_mediaStream) {
+        _mediaStream.getTracks().forEach(t => t.stop());
+        _mediaStream = null;
+      }
+      const vid = document.getElementById('scan-video');
+      if (vid) vid.srcObject = null;
+      const laser = document.getElementById('scan-laser');
+      if (laser) { laser.style.display = 'none'; gsap.killTweensOf(laser); }
+      // Hide stop button, show overlay again
+      const stopBtn = document.getElementById('stop-cam-btn');
+      if (stopBtn) stopBtn.style.display = 'none';
+      const overlay = document.getElementById('scanner-overlay');
+      if (overlay) { overlay.style.display = 'flex'; gsap.to(overlay, { opacity: 1, duration: .5 }); }
+      setRes('<span style="color:rgba(99,102,241,.65)">CAMERA INACTIVE</span>');
+    }
+
+    function setRes(html) { document.getElementById('scan-result').innerHTML = html; }
+
+    function processQR(text) {
+      if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+      setRes('<span style="color:#06b6d4;font-weight:900" class="animate-pulse">⚡ VERIFYING ID...</span>');
+      fetch('/api/scan_qr', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ qr_data: text }) })
+        .then(r => r.json()).then(data => {
+          const ok = data.status === 'success';
+          if (ok) {
+            scannedSet.add(text);
+            playScanSuccess();
+            const matchDone = data.match_past;
+            const displayName = (data.user_data && data.user_data.name) ? data.user_data.name : (data.user || text);
+            const lbl = matchDone ? `⚠️ MATCH PAST: ${displayName}` : `✓ GRANTED: ${displayName}`;
+            setRes(`<span style="color:${matchDone ? '#f59e0b' : '#22c55e'};font-weight:900">${lbl}</span>`);
+            gsap.fromTo('.scanner-frame', { boxShadow: `0 0 80px rgba(${matchDone ? '245,158,11' : '34,197,94'},.6)` }, { boxShadow: '0 0 0 rgba(0,0,0,0)', duration: 2 });
+            grantedCount++;
+            scanCount = grantedCount;
+            // Note: 'today-scans' element doesn't exist; use s1 instead
+            const s1el = document.getElementById('s1'); if (s1el) s1el.innerText = scanCount;
+            const sokEl = document.getElementById('s-ok'); if (sokEl) sokEl.innerText = grantedCount;
+            const badge = document.getElementById('scan-count-badge'); if (badge) badge.innerText = `${scanCount} RECORDS`;
+            addEntry(displayName, 'ok', text, data);
+          } else {
+            playScanFail();
+            setRes(`<span style="color:#ef4444;font-weight:900">✗ DENIED: ${data.message}</span>`);
+            gsap.fromTo('.scanner-frame', { x: -6 }, { x: 6, yoyo: true, repeat: 5, duration: .05, ease: 'power1.inOut' });
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            deniedCount++;
+            document.getElementById('s-fail').innerText = deniedCount;
+            addEntry(text.substring(0, 30), 'fail', text, data);
+          }
+          setTimeout(() => { if (scannerActive) setRes('<span style="color:#22c55e;font-weight:900">SCANNER ACTIVE · ALIGN QR CODE</span>'); }, 2500);
+        }).catch(() => setRes('<span style="color:#ef4444">NETWORK ERROR</span>'));
+    }
+
+    let regData = false, entrySeq = 0;
+    function addEntry(label, status, rawText, apiData) {
+      if (!regData) { document.getElementById('empty-state')?.remove(); regData = true; }
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const ok = status === 'ok';
+      const matchDone = apiData && apiData.match_past;
+      const id = 'e' + (++entrySeq);
+      const div = document.createElement('div');
+      div.style.cssText = 'margin-bottom:4px;cursor:pointer';
+      div.innerHTML = `
+  <div class="log-row ${status}" id="${id}-row" onclick="toggleEntry('${id}')" style="cursor:pointer;user-select:none${matchDone ? ';border-left-color:#f59e0b' : ''}">
+    <span style="color:${ok ? (matchDone ? '#fbbf24' : '#22c55e') : '#ef4444'};font-weight:900;font-size:11px;flex-shrink:0">${ok ? (matchDone ? '⚠️ PAST' : '✓ OK') : '✗ DENY'}</span>
+    <span style="color:${ok ? (matchDone ? '#fde68a' : '#4ade80') : '#f87171'};flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">${label}</span>
     <span style="color:rgba(255,255,255,.55);font-size:9px;flex-shrink:0">${time}</span>
     <span id="${id}-arrow" style="color:rgba(255,255,255,.4);font-size:9px;margin-left:4px;transition:transform .3s">▼</span>
   </div>
-  <div id="${id}-detail" style="display:none;overflow:hidden;background:rgba(0,0,0,.45);border-radius:0 0 8px 8px;border:1px solid rgba(${ok?'34,197,94':'239,68,68'},.15);border-top:none;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:10px">
-    ${ apiData&&apiData.user_data ? `
+  <div id="${id}-detail" style="display:none;overflow:hidden;background:rgba(0,0,0,.45);border-radius:0 0 8px 8px;border:1px solid rgba(${ok ? '34,197,94' : '239,68,68'},.15);border-top:none;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:10px">
+    ${apiData && apiData.user_data ? `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
-      <div><span style="color:rgba(139,92,246,.8);font-weight:700">NAME</span><br><span style="color:#e2e8f0">${apiData.user_data.name||'—'}</span></div>
-      <div><span style="color:rgba(6,182,212,.8);font-weight:700">PHONE</span><br><span style="color:#e2e8f0">${apiData.user_data.phone||'—'}</span></div>
-      <div style="grid-column:1/-1"><span style="color:rgba(99,102,241,.8);font-weight:700">EMAIL</span><br><span style="color:#e2e8f0">${apiData.user_data.email||label}</span></div>
-      <div style="grid-column:1/-1"><span style="color:rgba(245,158,11,.8);font-weight:700">MATCH</span><br><span style="color:#e2e8f0">${apiData.user_data.match_name||'—'} · ${apiData.user_data.match_date||''}</span></div>
+      <div><span style="color:rgba(139,92,246,.8);font-weight:700">NAME</span><br><span style="color:#e2e8f0">${apiData.user_data.name || '—'}</span></div>
+      <div><span style="color:rgba(6,182,212,.8);font-weight:700">PHONE</span><br><span style="color:#e2e8f0">${apiData.user_data.phone || '—'}</span></div>
+      <div style="grid-column:1/-1"><span style="color:rgba(99,102,241,.8);font-weight:700">EMAIL</span><br><span style="color:#e2e8f0">${apiData.user_data.email || label}</span></div>
+      <div style="grid-column:1/-1"><span style="color:rgba(245,158,11,.8);font-weight:700">MATCH</span><br><span style="color:#e2e8f0">${apiData.user_data.match_name || '—'} · ${apiData.user_data.match_date || ''}</span></div>
     </div>
-    ${ matchDone ? '<div style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:6px;padding:6px 8px;color:#fbbf24;font-weight:700">⚠️ MATCH ALREADY COMPLETED — Ticket for a past event</div>' : '' }` : `
+    ${matchDone ? '<div style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);border-radius:6px;padding:6px 8px;color:#fbbf24;font-weight:700">⚠️ MATCH ALREADY COMPLETED — Ticket for a past event</div>' : ''}` : `
     <p style="color:rgba(255,255,255,.55);margin-bottom:3px">
-      <span style="color:rgba(139,92,246,.8);font-weight:700">STATUS</span>  ${ok?'ENTRY GRANTED':'ENTRY DENIED'}
+      <span style="color:rgba(139,92,246,.8);font-weight:700">STATUS</span>  ${ok ? 'ENTRY GRANTED' : 'ENTRY DENIED'}
     </p>
-    <p style="color:rgba(255,255,255,.55)"><span style="color:rgba(6,182,212,.8);font-weight:700">ID</span>  ${rawText||label}</p>`}
-    <p style="color:rgba(255,255,255,.35);margin-top:6px;font-size:9px"><span style="color:rgba(6,182,212,.6);font-weight:700">TIME</span>  ${new Date().toLocaleString([],{dateStyle:'short',timeStyle:'medium'})}</p>
+    <p style="color:rgba(255,255,255,.55)"><span style="color:rgba(6,182,212,.8);font-weight:700">ID</span>  ${rawText || label}</p>`}
+    <p style="color:rgba(255,255,255,.35);margin-top:6px;font-size:9px"><span style="color:rgba(6,182,212,.6);font-weight:700">TIME</span>  ${new Date().toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' })}</p>
   </div>`;
-  document.getElementById('entry-list').prepend(div);
-  gsap.from('#'+id+'-row',{x:-16,opacity:0,duration:.4,ease:'power3.out'});
-}
-function toggleEntry(id){
-  const detail=document.getElementById(id+'-detail');
-  const arrow=document.getElementById(id+'-arrow');
-  const isOpen=detail.style.display!=='none';
-  if(isOpen){
-    gsap.to(detail,{height:0,opacity:0,duration:.25,ease:'power2.in',onComplete:()=>{detail.style.display='none';detail.style.height='';}});
-    arrow.style.transform='rotate(0deg)';
-  }else{
-    detail.style.display='block';
-    detail.style.height='0px';detail.style.opacity='0';
-    gsap.to(detail,{height:'auto',opacity:1,duration:.3,ease:'power2.out'});
-    arrow.style.transform='rotate(180deg)';
-  }
-}
+      document.getElementById('entry-list').prepend(div);
+      gsap.from('#' + id + '-row', { x: -16, opacity: 0, duration: .4, ease: 'power3.out' });
+    }
+    function toggleEntry(id) {
+      const detail = document.getElementById(id + '-detail');
+      const arrow = document.getElementById(id + '-arrow');
+      const isOpen = detail.style.display !== 'none';
+      if (isOpen) {
+        gsap.to(detail, { height: 0, opacity: 0, duration: .25, ease: 'power2.in', onComplete: () => { detail.style.display = 'none'; detail.style.height = ''; } });
+        arrow.style.transform = 'rotate(0deg)';
+      } else {
+        detail.style.display = 'block';
+        detail.style.height = '0px'; detail.style.opacity = '0';
+        gsap.to(detail, { height: 'auto', opacity: 1, duration: .3, ease: 'power2.out' });
+        arrow.style.transform = 'rotate(180deg)';
+      }
+    }
 
-function updateGateStatusBadge(status){
-  const badge=document.getElementById('gate-status-badge');
-  const dot=document.getElementById('gate-status-dot');
-  const txt=document.getElementById('gate-status-text');
-  const sm=document.getElementById('gate-status-sm');
-  const ring=document.getElementById('cap-ring');
-  const dot2=document.getElementById('gate-status');
-  const csMap={
-    open:{cls:'status-open',tc:'#22c55e',dc:'#22c55e',label:'OPEN',rc:'url(#rg)'},
-    busy:{cls:'status-busy',tc:'#f59e0b',dc:'#f59e0b',label:'BUSY',rc:'#f59e0b'},
-    full:{cls:'status-full',tc:'#ef4444',dc:'#ef4444',label:'FULL',rc:'#ef4444'},
-    closed:{cls:'status-closed',tc:'#9ca3af',dc:'#6b7280',label:'CLOSED',rc:'#4b5563'}
-  };
-  const c=csMap[status]||csMap.open;
-  badge.className=`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest ${c.cls} transition-all duration-500`;
-  dot.style.background=c.dc;
-  txt.style.color=c.tc;txt.innerText=c.label;
-  if(sm){sm.style.color=c.tc;sm.innerText=c.label.charAt(0)+c.label.slice(1).toLowerCase();}
-  if(ring)ring.setAttribute('stroke',c.rc);
-  if(status==='full'){playBeep(220,.6,'sawtooth');gsap.fromTo('main',{},{filter:'saturate(1)'},);}
-}
-</script>
-{% include 'chatbot_snippet.html' %}
+    function updateGateStatusBadge(status) {
+      const badge = document.getElementById('gate-status-badge');
+      const dot = document.getElementById('gate-status-dot');
+      const txt = document.getElementById('gate-status-text');
+      const sm = document.getElementById('gate-status-sm');
+      const ring = document.getElementById('cap-ring');
+      const dot2 = document.getElementById('gate-status');
+      const csMap = {
+        open: { cls: 'status-open', tc: '#22c55e', dc: '#22c55e', label: 'OPEN', rc: 'url(#rg)' },
+        busy: { cls: 'status-busy', tc: '#f59e0b', dc: '#f59e0b', label: 'BUSY', rc: '#f59e0b' },
+        full: { cls: 'status-full', tc: '#ef4444', dc: '#ef4444', label: 'FULL', rc: '#ef4444' },
+        closed: { cls: 'status-closed', tc: '#9ca3af', dc: '#6b7280', label: 'CLOSED', rc: '#4b5563' }
+      };
+      const c = csMap[status] || csMap.open;
+      badge.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest ${c.cls} transition-all duration-500`;
+      dot.style.background = c.dc;
+      txt.style.color = c.tc; txt.innerText = c.label;
+      if (sm) { sm.style.color = c.tc; sm.innerText = c.label.charAt(0) + c.label.slice(1).toLowerCase(); }
+      if (ring) ring.setAttribute('stroke', c.rc);
+      if (status === 'full') { playBeep(220, .6, 'sawtooth'); gsap.fromTo('main', {}, { filter: 'saturate(1)' },); }
+    }
+  </script>
+  {% include 'chatbot_snippet.html' %}
 </body>
+
 </html>

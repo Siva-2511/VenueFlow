@@ -14,6 +14,50 @@ body{font-family:'Inter',sans-serif;background:var(--c-bg);color:#fff;-webkit-fo
 .font-orb{font-family:'Orbitron',monospace!important}
 .font-mono{font-family:'JetBrains Mono',monospace!important}
 
+/* ── Accessibility: Focus Indicators (WCAG 2.1) ────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--neon-b);
+  outline-offset: 4px;
+  box-shadow: 0 0 15px var(--neon-b);
+}
+
+/* ── Accessibility: Skip-Navigation ────────────────────────────────── */
+.skip-nav {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  padding: 10px 24px;
+  background: #6366f1;
+  color: white;
+  text-decoration: none;
+  font-weight: 900;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 10px 30px rgba(99,102,241,0.5);
+  transition: top 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.skip-nav:focus {
+  top: 0;
+}
+
+/* ── Accessibility: Visually Hidden ────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -211,10 +255,23 @@ button:not(:disabled):active{transform:scale(.96)!important}
 @keyframes dataStream{0%{background-position:0% 0%}100%{background-position:0% 200%}}
 .data-stream{background:linear-gradient(180deg,rgba(6,182,212,.9) 0%,rgba(99,102,241,.7) 50%,rgba(6,182,212,.9) 100%);background-size:100% 200%;animation:dataStream 2s linear infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
+/* Skip-nav removed here, consolidated at top of file */
+
 /* ── Countdown blocks ── */
 @keyframes cdPulse{0%,100%{box-shadow:0 0 0 rgba(99,102,241,0)}60%{box-shadow:0 0 20px rgba(99,102,241,.35)}}
 .cd-block{animation:cdPulse 2s ease-in-out infinite}
 
 /* ── Gate orb ring ── */
 @keyframes orbRing{0%{transform:scale(1);opacity:.7}50%{transform:scale(1.15);opacity:.3}100%{transform:scale(1);opacity:.7}}
-.gate-orb-ring{position:absolute;inset:-8px;border-radius:50%;border:2px solid;animation:orbRing 2.5s ease-in-out infinite}
+
+/* ... existing styles ... */
+
+/* ── Google Translate Premium Override ── */
+#google_translate_element { min-height: 38px !important; display: flex !important; align-items: center !important; z-index: 1000 !important; position: relative !important; }
+.goog-te-gadget { font-family:'Inter',sans-serif!important; font-size:11px!important; margin:0!important; color:rgba(255,255,255,0.4)!important; }
+.goog-te-gadget .goog-te-combo { background:rgba(99,102,241,.18)!important; border:1px solid rgba(255,255,255,.25)!important; padding:6px 12px!important; border-radius:8px!important; color:#fff!important; font-size:11px!important; font-family:'Inter',sans-serif!important; cursor:pointer!important; outline:none!important; transition:all 0.3s ease!important; appearance:none!important; -webkit-appearance:none!important; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E")!important; background-repeat:no-repeat!important; background-position:right 8px center!important; padding-right:28px!important; min-width: 140px!important; visibility: visible!important; display: inline-block!important; height: auto!important; }
+.goog-te-gadget .goog-te-combo:hover { background:rgba(99,102,241,.3)!important; border-color:rgba(99,102,241,.6)!important; box-shadow:0 0 15px rgba(99,102,241,.3)!important; }
+.goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon, .goog-logo-link { display:none!important; }
+.goog-te-gadget > div > span:not(.goog-te-combo) { display:none!important; }
+body { top:0px!important; position: static!important; }
+.goog-te-gadget .goog-te-combo option { background:#0a081e!important; color:#fff!important; padding: 4px!important; }

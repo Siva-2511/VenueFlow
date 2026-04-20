@@ -1,16 +1,20 @@
 const CACHE_NAME = 'venueflow-v1';
 const urlsToCache = [
-  '/',
-  '/dashboard',
-  '/ar-nav',
+  '/login',
+  '/user',
   '/static/css/style.css',
-  '/static/js/main.js'
+  '/static/js/main.js',
+  '/static/favicon.ico'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+      .then(cache => {
+        return Promise.allSettled(urlsToCache.map(url => {
+          return cache.add(url).catch(err => console.warn('SW cache.add failed for:', url, err));
+        }));
+      })
   );
 });
 

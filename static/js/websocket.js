@@ -3,6 +3,10 @@ let socket;
 function initWebSockets(role, currentGateName = null, gateId = null) {
     socket = io();
     
+    socket.on('alert_broadcast', (data) => {
+        showAlert(data.message, data.type || 'warning');
+    });
+
     socket.on('connect', () => {});
     
     socket.on('gate_update', (data) => {
@@ -100,14 +104,14 @@ function updateAdminDashboard(data) {
                 </div>
                 <div class="flex items-baseline gap-1 mb-3">
                     <span class="font-orb text-3xl font-black text-white" id="count-${info.id}">0</span>
-                    <span class="text-xs font-mono" style="color:rgba(255,255,255,.4)">/${info.max}</span>
+                    <span class="text-xs font-mono" style="color:rgba(255,255,255,.4)">/${info.capacity}</span>
                 </div>
                 <div class="relative h-1.5 rounded-full overflow-hidden mb-2" style="background:rgba(255,255,255,.04)">
                     <div id="bar-${info.id}" class="absolute left-0 top-0 h-full rounded-full w-0 transition-all duration-700" style="background:${nc.dot}"></div>
                 </div>
                 <div class="flex justify-between items-center mb-3">
                     <span id="pct-${info.id}" class="text-[8px] font-mono font-bold" style="color:${nc.dot}">0%</span>
-                    <span class="text-[8px] font-mono" style="color:rgba(255,255,255,.35)">${info.max}</span>
+                    <span class="text-[8px] font-mono" style="color:rgba(255,255,255,.35)">${info.capacity}</span>
                 </div>
                 <div class="gate-actions grid grid-cols-2 gap-1.5">
                     <button onclick="adminRedirect(${info.id})" class="text-[7px] font-orb font-black uppercase tracking-widest py-1.5 rounded-lg border transition-all" style="background:rgba(99,102,241,.1);color:#818cf8;border-color:rgba(99,102,241,.25)" onmouseover="this.style.background='rgba(99,102,241,.25)'" onmouseout="this.style.background='rgba(99,102,241,.1)'">Alert</button>
@@ -123,7 +127,7 @@ function updateAdminDashboard(data) {
     sorted.forEach((gate, idx) => {
         const info = data[gate];
         totalCurrent += info.current;
-        totalMax += info.max;
+        totalMax += info.capacity;
 
         const box     = document.getElementById(`gate-box-${info.id}`);
         const count   = document.getElementById(`count-${info.id}`);
@@ -133,7 +137,7 @@ function updateAdminDashboard(data) {
         const lockBtn = document.getElementById(`lock-btn-${info.id}`);
         if (!box || !count) return;
 
-        const fillPct = Math.round((info.current / info.max) * 100);
+        const fillPct = Math.round((info.current / info.capacity) * 100);
         const nc = neonColors[info.status] || neonColors.open;
 
         // Animate number counter
@@ -149,6 +153,19 @@ function updateAdminDashboard(data) {
         // Update neon border on box top line
         const topBar = box.querySelector(':scope > div:first-child');
         if (topBar) topBar.style.background = nc;
+
+        if (lockBtn) {
+            const isClosed = info.status === 'closed';
+            lockBtn.innerText = isClosed ? 'Unlock' : 'Lock';
+            lockBtn.style.color = isClosed ? '#4ade80' : '#f87171';
+            lockBtn.style.background = isClosed ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)';
+            lockBtn.style.borderColor = isClosed ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.25)';
+        }
+
+        // Sync to 3D stadium
+        if (window._updateStadiumPillar) {
+            window._updateStadiumPillar(idx, info.current / info.capacity, info.status);
+        }
 
         // Particle burst if full
         if (info.status === 'full') {
@@ -187,7 +204,7 @@ function updateAdminDashboard(data) {
     // Update KPI Total Crowd card (uses __meta__ from backend)
     const meta = data['__meta__'];
     if (meta && typeof window._updateTotalCrowdKPI === 'function') {
-        window._updateTotalCrowdKPI(meta.total, meta.max);
+        window._updateTotalCrowdKPI(meta.total, meta.capacity);
     } else {
         // fallback: sum from sorted data
         if (typeof window._updateTotalCrowdKPI === 'function') {
@@ -233,7 +250,7 @@ function updateStaffLiveData(data, currentGateName) {
                         onUpdate: () => countEl.innerText = Math.floor(cur.val) });
     }
 
-    const pct = Math.round((info.current / info.max) * 100);
+    const pct = Math.round((info.current / info.capacity) * 100);
 
     // Update ring (circumference = 2π×52 ≈ 326.7)
     if (ring) {
@@ -257,8 +274,8 @@ function updateStaffLiveData(data, currentGateName) {
     if (pctEl) pctEl.innerText = `${pct}% filled`;
     if (remaining) {
         const cur = { val: parseInt(remaining.innerText) || 0 };
-        gsap.to(cur, { val: info.max - info.current, duration: 1.5, ease: 'power2.out',
-                        onUpdate: () => remaining.innerText = Math.floor(cur.val) });
+        gsap.to(cur, { val: info.capacity - info.current, duration: 1.5, ease: 'power2.out',
+                        onUpdate: () => remaining.innerText = Math.max(0, Math.floor(cur.val)) });
     }
     if (statusSm) {
         const label = (info.status || 'open');
@@ -340,6 +357,10 @@ function showAlert(message, type = 'warning') {
     banner.style.background = gradients[type] || gradients.warning;
     msg.innerText = message;
     if (icon) icon.innerText = type === 'success' ? '✅' : type === 'info' ? 'ℹ️' : '⚠️';
+
+    banner.classList.remove('hidden');
+    banner.style.opacity = '1';
+    banner.style.pointerEvents = 'auto';
 
     gsap.to(banner, { y: 0, duration: 0.6, ease: 'back.out(1.4)' });
     if (navigator.vibrate) navigator.vibrate([200, 100, 200]);

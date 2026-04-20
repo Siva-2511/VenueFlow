@@ -1,6 +1,6 @@
 import os
 import pytest
-from app import app, sanitize, get_least_busy_gate
+from app import app, sanitize_input, get_least_busy_gate
 
 def test_root_redirect(client):
     """Test that the root URL redirects to login."""
@@ -22,9 +22,9 @@ def test_google_callback_missing_code(client):
 
 def test_sanitize_function():
     """Test the input sanitizer logic."""
-    assert sanitize("hello <script>alert(1)</script>", 50) == "hello scriptalert(1)/script"
-    assert sanitize("a" * 100, 10) == "aaaaaaaaaa"
-    assert sanitize("", 10) == ""
+    assert sanitize_input("hello <script>alert(1)</script>", 50) == "hello scriptalert(1)/script"
+    assert sanitize_input("a" * 100, 10) == "aaaaaaaaaa"
+    assert sanitize_input("", 10) == ""
 
 def test_protected_routes_without_auth(client):
     """Edge Case: Unauthenticated users should be blocked from protected routes."""

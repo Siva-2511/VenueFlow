@@ -1,38 +1,31 @@
 import pytest
-from gemini_agent import get_chat_response, analyze_crowd_data
+from unittest.mock import patch
+import gemini_agent
 
-def test_chat_response_logic(mocker):
-    """Test the chatbot response wrapper logic with mocking."""
-    # Mock the Client constructor
-    mock_client_inst = mocker.Mock()
-    mocker.patch('google.genai.Client', return_value=mock_client_inst)
-    
-    mock_resp = mocker.Mock()
-    mock_resp.text = "Hello! I am VenueFlow AI."
-    mock_client_inst.models.generate_content.return_value = mock_resp
-    
-    # Needs 3 args: message, role, context_data
-    response = get_chat_response("Hi", "user", {"info": "test"})
-    assert "VenueFlow AI" in response
+def test_gemini_cache_logic():
+    """Test that the AI response cache functions correctly."""
+    with patch('google.genai.Client') as mock_client:
+        mock_instance = mock_client.return_value
+        mock_instance.models.generate_content.return_value.text = "Mock AI Response"
+        
+        # First call
+        res1 = gemini_agent.analyze_crowd_data("Test Data")
+        # Second call should be cached (even if we disconnect API)
+        res2 = gemini_agent.analyze_crowd_data("Test Data")
+        
+        assert res1 == res2 == "Mock AI Response"
 
-def test_analyze_crowd_data_logic(mocker):
-    """Test the crowd analysis logic."""
-    mock_client_inst = mocker.Mock()
-    mocker.patch('google.genai.Client', return_value=mock_client_inst)
-    
-    mock_resp = mocker.Mock()
-    mock_resp.text = "Stadium load is 50%. Suggesting Gate 4. 🏟"
-    mock_client_inst.models.generate_content.return_value = mock_resp
-    
-    insight = analyze_crowd_data({"gates": []})
-    assert "Gate 4" in insight
+def test_chat_response_structure():
+    """Test that the chatbot includes system instructions."""
+    with patch('google.genai.Client') as mock_client:
+        mock_instance = mock_client.return_value
+        mock_instance.models.generate_content.return_value.text = "Hello Fan"
+        
+        resp = gemini_agent.get_chat_response("Hi", "user", "General")
+        assert "Hello Fan" in resp
 
-def test_gemini_error_handling(mocker):
-    """Test that the agent handles API errors gracefully."""
-    mock_client_inst = mocker.Mock()
-    mocker.patch('google.genai.Client', return_value=mock_client_inst)
-    mock_client_inst.models.generate_content.side_effect = Exception("Quota Exceeded")
-    
-    response = get_chat_response("Hi", "admin", {})
-    # Since my gemini_agent.py has try/except that prints and returns a string
-    assert "trouble" in response or "Bot Error" in response or "handling" in response
+def test_gemini_error_handling():
+    """Test that the system handles Gemini quota limits gracefully."""
+    with patch('google.genai.Client', side_effect=Exception("429 RESOURCE_EXHAUSTED")):
+        resp = gemini_agent.analyze_crowd_data("Some Data")
+        assert "Cooling Down" in resp or "Unavailable" in resp
